@@ -9,7 +9,9 @@ import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.awt.geom.Line2D;
 
+import static java.awt.geom.Line2D.linesIntersect;
 import static jdk.nashorn.internal.objects.NativeMath.round;
 
 public class Player extends Placeable {
@@ -41,13 +43,12 @@ public class Player extends Placeable {
     private ArrayList<Obj> objects = new ArrayList<>();
 
 
-
     private double jumpTime = 0;
 
     private Timer t = new Timer(1, new Player.Listener());
     private KeyListener key = new PlayerKey();
 
-    public Player(String pSprite, double pPosX, double pPosY, double pScale, double pMaxJumpTime){
+    public Player(String pSprite, double pPosX, double pPosY, double pScale, double pMaxJumpTime) {
         super(pSprite, pPosX, pPosY, pScale);
         maxJumpTime = pMaxJumpTime;
         t.setDelay(10);
@@ -59,15 +60,15 @@ public class Player extends Placeable {
     }
 
     private class Listener implements ActionListener {
-        public void actionPerformed(ActionEvent e){
-            if(active) {
+        public void actionPerformed(ActionEvent e) {
+            if (active) {
                 height();
                 xMovement();
             }
         }
     }
 
-    public KeyListener getPlayerKey(){
+    public KeyListener getPlayerKey() {
         return key;
     }
 
@@ -80,42 +81,31 @@ public class Player extends Placeable {
         return bd.doubleValue();
     }
 
-    private void xMovement(){
+    private void xMovement() {
         //System.out.println(currentXSpeed);
-        if(right && left || (!right && !left)){
-            if(currentXSpeed > 0) {
+        if (right && left || (!right && !left)) {
+            if (currentXSpeed > 0) {
                 currentXSpeed = currentXSpeed - acc;
                 currentXSpeed = round(currentXSpeed, 3);
-            }
-            else if(currentXSpeed < 0) {
+            } else if (currentXSpeed < 0) {
                 currentXSpeed = currentXSpeed + acc;
                 currentXSpeed = round(currentXSpeed, 3);
             }
-        }
-        else if(canMoveRight && right) {
-            if(currentXSpeed < maxSpeed) {
+        } else if (right) {
+            if (currentXSpeed < maxSpeed) {
                 currentXSpeed = currentXSpeed + acc;
                 currentXSpeed = round(currentXSpeed, 3);
             }
-        }
-        else if(canMoveLeft && left) {
-            if(currentXSpeed > -maxSpeed) {
+        } else if (left) {
+            if (currentXSpeed > -maxSpeed) {
                 currentXSpeed = currentXSpeed - acc;
                 currentXSpeed = round(currentXSpeed, 3);
             }
         }
-
-        if(!canMoveRight && currentXSpeed > 0){
-            currentXSpeed = 0;
-        }
-        if(!canMoveLeft && currentXSpeed < 0){
-            currentXSpeed = 0;
-        }
-        setPosX(getPosX()+currentXSpeed);
     }
 
     public class PlayerKey implements KeyListener {
-        public void keyPressed(KeyEvent e){
+        public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_UP) {
                 pressedUp();
             }
@@ -126,7 +116,8 @@ public class Player extends Placeable {
                 pressedLeft();
             }
         }
-        public void keyReleased(KeyEvent e){
+
+        public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_UP) {
                 releaseUp();
             }
@@ -137,21 +128,22 @@ public class Player extends Placeable {
                 releaseLeft();
             }
         }
+
         public void keyTyped(KeyEvent e) {/* Not used */ }
 
-        private void pressedUp(){
+        private void pressedUp() {
             tryJumping = true;
         }
 
-        private void pressedRight(){
+        private void pressedRight() {
             right = true;
         }
 
-        private void pressedLeft(){
+        private void pressedLeft() {
             left = true;
         }
 
-        private void releaseUp(){
+        private void releaseUp() {
             if (jumping) {
                 jumping = false;
                 canJump = false;
@@ -159,17 +151,17 @@ public class Player extends Placeable {
             tryJumping = false;
         }
 
-        private void releaseRight(){
+        private void releaseRight() {
             right = false;
         }
 
-        private void releaseLeft(){
+        private void releaseLeft() {
             left = false;
         }
     }
 
 
-    public void onGround(){
+    public void onGround() {
         canJump = true;
         jumping = false;
         jumpTime = 0;
@@ -177,84 +169,92 @@ public class Player extends Placeable {
         currentYSpeed = 0;
     }
 
-    public void inAir(){
+    public void inAir() {
         onGround = false;
-        currentYSpeed = currentYSpeed + gravity;
     }
 
-    public void setObjects(ArrayList<Obj> objects){
+    public void setObjects(ArrayList<Obj> objects) {
         this.objects = objects;
     }
 
     //purely for player, adding in collision for enemies next.
-    public void objectCollision(double mod, double modX){
+    public void objectCollision(double mod, double modX) {
         mod = round(mod, 3);
         boolean collide = false;
-        for(Obj o : objects) {
-            double top;
-            double left;
-            double right;
-            double bottom;
-            if (((getPosY() + mod + getHitbox().height) >= (o.getPosY()) &&
-                    (getPosY() + mod) <= (o.getPosY() + o.getHitbox().height) &&
-                    (getPosX() + getHitbox().width + modX >= o.getPosX()) &&
-                    (getPosX() + modX <= o.getPosX() + o.getHitbox().width)
-            )) {
-                top = getPosY() + mod + getHitbox().height - (o.getPosY());
-                bottom = (o.getPosY() + o.getHitbox().height) - (getPosY() + mod);
-                right = (getPosX() + getHitbox().width + modX - o.getPosX());
-                left = (o.getPosX() + o.getHitbox().width - getPosX() + modX);
-                if(top <= bottom && top <= right && top <= left){
-                    setPosY(o.getPosY() - getHitbox().height);
-                    onGround();
-                    collide = true;
-                }
-                else if(bottom <= right && bottom <= left){
-                    setPosY(o.getPosY() + o.getHitbox().height);
-                    jumping = false;
-                    currentYSpeed = 0;
-                }
-                else if(left >= right){
-                    setPosX(o.getPosX() - getHitbox().width);
-                    currentXSpeed = 0;
-                }
-                else{
-                    setPosX(o.getPosX() + o.getHitbox().width);
-                    currentXSpeed = 0;
-                }
-            }
+        boolean collideGround = false;
 
+        double currentPosX = getPosX(); //left
+        double currentPosY = getPosY(); //top
+        double currentPosX2 = currentPosX + getHitbox().width; //right
+        double currentPosY2 = currentPosY + getHitbox().height; //bottom
+
+        double predPosX = currentPosX + modX; //left
+        double predPosY = currentPosY + mod; //top
+        double predPosX2 = predPosX + getHitbox().width; //right
+        double predPosY2 = predPosY + getHitbox().height; //bottom
+
+        for (Obj o : objects) {
+            double tmpX1 = o.getPosX(); //left
+            double tmpY1 = o.getPosY(); //top
+            double tmpX2 = tmpX1 + o.getHitbox().width; //right
+            double tmpY2 = o.getPosY() + o.getHitbox().height; //bottom
+            if(linesIntersect(tmpX1, tmpY1, tmpX2, tmpY1, currentPosX, currentPosY2, predPosX, predPosY2) || linesIntersect(tmpX1, tmpY1, tmpX2, tmpY1, currentPosX2, currentPosY2, predPosX2, predPosY2)){
+                setPosY(o.getPosY() - getHitbox().height-0.001);
+                onGround();
+                collideGround = true;
+            }
+            else if(linesIntersect(tmpX1, tmpY1, tmpX1, tmpY2, currentPosX2, currentPosY, predPosX2, predPosY) || linesIntersect(tmpX1, tmpY1, tmpX1, tmpY2, currentPosX2, currentPosY2, predPosX2, predPosY2)){
+                setPosX(tmpX1 - getHitbox().width - 0.001);
+                currentXSpeed = 0;
+                collide = true;
+            }
+            else if(linesIntersect(tmpX2, tmpY1, tmpX2, tmpY2, currentPosX, currentPosY, predPosX, predPosY) || linesIntersect(tmpX2, tmpY1, tmpX2, tmpY2, currentPosX, currentPosY2, predPosX, predPosY2)){
+                setPosX(tmpX2 + 0.001);
+                currentXSpeed = 0;
+                collide = true;
+            }
+            else if(linesIntersect(tmpX1, tmpY2, tmpX2, tmpY2, currentPosX, currentPosY, predPosX, predPosY) || linesIntersect(tmpX1, tmpY2, tmpX2, tmpY2, currentPosX2, currentPosY, predPosX2, predPosY)){
+                setPosY(tmpY2 + 0.001);
+                jumping = false;
+                currentYSpeed = 0;
+                collideGround = true;
+            }
         }
         if(!collide){
+            setPosX(getPosX() + currentXSpeed);
+        }
+        if(!collideGround ){
             inAir();
             setPosY(getPosY() + mod);
         }
     }
 
-    private void height(){
-        if (canJump && tryJumping){
+    private void height() {
+        if (canJump && tryJumping) {
             jumping = true;
             jumpTime = 0;
             canJump = false;
         }
-        if (jumpTime > maxJumpTime){
+        if (jumpTime > maxJumpTime) {
             jumping = false;
         }
 
-        if(currentXSpeed != 0 && onGround){
-            currentYSpeed = -Math.abs(currentXSpeed)/2;
+        if (currentXSpeed != 0 && onGround) {
+            currentYSpeed = -Math.abs(currentXSpeed) / 2;
         }
-        if((right || left) && onGround){
+        if ((right || left) && onGround) {
             currentYSpeed = -jumpSpeed;
         }
-        if(jumping){
+        if (jumping) {
             currentYSpeed = -jumpSpeed;
         }
+        currentYSpeed = currentYSpeed + gravity;
+
         objectCollision(currentYSpeed, currentXSpeed);
         jumpTime++;
     }
 
-    public void reset(){
+    public void reset() {
         setPosY(getDefaultPosY());
         setPosX(getDefaultPosX());
 
@@ -283,20 +283,5 @@ public class Player extends Placeable {
 
         jumpTime = 0;
     }
-
-    public boolean isCanMoveRight(){
-        return canMoveRight;
-    }
-
-    public boolean isCanMoveLeft(){
-        return canMoveLeft;
-    }
-
-    public void setCanMoveLeft(boolean b){
-        canMoveLeft = b;
-    }
-
-    public void setCanMoveRight(boolean b){
-        canMoveRight = b;
-    }
 }
+
