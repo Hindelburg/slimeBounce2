@@ -1,23 +1,21 @@
 package com.company;
 
+import org.w3c.dom.css.Rect;
+
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.lang.reflect.Array;
+import java.awt.geom.Line2D;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.awt.geom.Line2D;
-
-import static java.awt.geom.Line2D.linesIntersect;
-import static jdk.nashorn.internal.objects.NativeMath.round;
 
 public class Player extends Placeable {
     private double maxJumpTime;
 
-    private double xSpeed = 1;
     private double currentXSpeed = 0;
 
     private double gravity = 0.5;
@@ -62,8 +60,9 @@ public class Player extends Placeable {
     private class Listener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             if (active) {
-                height();
-                xMovement();
+                ySpeed();
+                xSpeed();
+                safeMove();
             }
         }
     }
@@ -81,26 +80,113 @@ public class Player extends Placeable {
         return bd.doubleValue();
     }
 
-    private void xMovement() {
-        //System.out.println(currentXSpeed);
+    private void xSpeed() {
         if (right && left || (!right && !left)) {
             if (currentXSpeed > 0) {
                 currentXSpeed = currentXSpeed - acc;
-                currentXSpeed = round(currentXSpeed, 3);
+                currentXSpeed = round(currentXSpeed, 2);
             } else if (currentXSpeed < 0) {
                 currentXSpeed = currentXSpeed + acc;
-                currentXSpeed = round(currentXSpeed, 3);
+                currentXSpeed = round(currentXSpeed, 2);
             }
         } else if (right) {
             if (currentXSpeed < maxSpeed) {
                 currentXSpeed = currentXSpeed + acc;
-                currentXSpeed = round(currentXSpeed, 3);
+                currentXSpeed = round(currentXSpeed, 2);
             }
         } else if (left) {
             if (currentXSpeed > -maxSpeed) {
                 currentXSpeed = currentXSpeed - acc;
-                currentXSpeed = round(currentXSpeed, 3);
+                currentXSpeed = round(currentXSpeed, 2);
             }
+        }
+    }
+
+    private void ySpeed() {
+        currentYSpeed = currentYSpeed + gravity;
+        if (canJump && tryJumping) {
+            jumping = true;
+            jumpTime = 0;
+            canJump = false;
+        }
+        if (jumpTime > maxJumpTime) {
+            jumping = false;
+        }
+
+        if (currentXSpeed != 0 && onGround) {
+            currentYSpeed = -Math.abs(currentXSpeed) / 2;
+        }
+        if ((right || left) && onGround) {
+            currentYSpeed = -jumpSpeed;
+        }
+        if (jumping) {
+            currentYSpeed = -jumpSpeed;
+        }
+        jumpTime++;
+    }
+
+
+    private boolean overlaps(double x, double y){
+        Rectangle r = new Rectangle((int)Math.round(x), (int)Math.round(y), getHitbox().width, getHitbox().height);
+        for (Obj o : objects) {
+            if(r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().width, o.getHitbox().height)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
+    private void safeMove(){
+        double i = 0;
+        double newPos;
+        while(i <= Math.abs(currentXSpeed)){
+            if(currentXSpeed > 0) {
+                newPos = getPosX() + 0.01;
+                if(overlaps(newPos, getPosY())) {
+                    setPosX(newPos);
+                }
+                else{
+                    currentXSpeed = 0;
+                }
+            }
+            else if(currentXSpeed < 0) {
+                newPos = getPosX() - 0.01;
+                if(overlaps(newPos, getPosY())) {
+                    setPosX(newPos);
+                }
+                else{
+                    currentXSpeed = 0;
+                }
+            }
+            i = i + 0.01;
+        }
+
+        i = 0;
+        while(i <= Math.abs(currentYSpeed)){
+            if(currentYSpeed > 0) {
+                newPos = getPosY() + 0.01;
+                if(overlaps(getPosX(), newPos)) {
+                    setPosY(newPos);
+                    inAir();
+                }
+                else{
+                    onGround();
+                }
+            }
+            else {
+                newPos = getPosY() - 0.01;
+                if(overlaps(getPosX(), newPos)) {
+                    inAir();
+                    setPosY(newPos);
+                }
+                else{
+                    currentYSpeed = 0;
+                    jumping = false;
+                }
+            }
+            i = i + 0.01;
         }
     }
 
@@ -177,88 +263,13 @@ public class Player extends Placeable {
         this.objects = objects;
     }
 
-    //purely for player, adding in collision for enemies next.
-    public void objectCollision(double mod, double modX) {
-        mod = round(mod, 3);
-        boolean collide = false;
-        boolean collideGround = false;
-
-        double currentPosX = getPosX(); //left
-        double currentPosY = getPosY(); //top
-        double currentPosX2 = currentPosX + getHitbox().width; //right
-        double currentPosY2 = currentPosY + getHitbox().height; //bottom
-
-        double predPosX = currentPosX + modX; //left
-        double predPosY = currentPosY + mod; //top
-        double predPosX2 = predPosX + getHitbox().width; //right
-        double predPosY2 = predPosY + getHitbox().height; //bottom
-
-        for (Obj o : objects) {
-            double tmpX1 = o.getPosX(); //left
-            double tmpY1 = o.getPosY(); //top
-            double tmpX2 = tmpX1 + o.getHitbox().width; //right
-            double tmpY2 = o.getPosY() + o.getHitbox().height; //bottom
-            if(linesIntersect(tmpX1, tmpY1, tmpX2, tmpY1, currentPosX, currentPosY2, predPosX, predPosY2) || linesIntersect(tmpX1, tmpY1, tmpX2, tmpY1, currentPosX2, currentPosY2, predPosX2, predPosY2)){
-                setPosY(o.getPosY() - getHitbox().height-0.001);
-                onGround();
-                collideGround = true;
-            }
-            else if(linesIntersect(tmpX1, tmpY1, tmpX1, tmpY2, currentPosX2, currentPosY, predPosX2, predPosY) || linesIntersect(tmpX1, tmpY1, tmpX1, tmpY2, currentPosX2, currentPosY2, predPosX2, predPosY2)){
-                setPosX(tmpX1 - getHitbox().width - 0.001);
-                currentXSpeed = 0;
-                collide = true;
-            }
-            else if(linesIntersect(tmpX2, tmpY1, tmpX2, tmpY2, currentPosX, currentPosY, predPosX, predPosY) || linesIntersect(tmpX2, tmpY1, tmpX2, tmpY2, currentPosX, currentPosY2, predPosX, predPosY2)){
-                setPosX(tmpX2 + 0.001);
-                currentXSpeed = 0;
-                collide = true;
-            }
-            else if(linesIntersect(tmpX1, tmpY2, tmpX2, tmpY2, currentPosX, currentPosY, predPosX, predPosY) || linesIntersect(tmpX1, tmpY2, tmpX2, tmpY2, currentPosX2, currentPosY, predPosX2, predPosY)){
-                setPosY(tmpY2 + 0.001);
-                jumping = false;
-                currentYSpeed = 0;
-                collideGround = true;
-            }
-        }
-        if(!collide){
-            setPosX(getPosX() + currentXSpeed);
-        }
-        if(!collideGround ){
-            inAir();
-            setPosY(getPosY() + mod);
-        }
-    }
-
-    private void height() {
-        if (canJump && tryJumping) {
-            jumping = true;
-            jumpTime = 0;
-            canJump = false;
-        }
-        if (jumpTime > maxJumpTime) {
-            jumping = false;
-        }
-
-        if (currentXSpeed != 0 && onGround) {
-            currentYSpeed = -Math.abs(currentXSpeed) / 2;
-        }
-        if ((right || left) && onGround) {
-            currentYSpeed = -jumpSpeed;
-        }
-        if (jumping) {
-            currentYSpeed = -jumpSpeed;
-        }
-        currentYSpeed = currentYSpeed + gravity;
-
-        objectCollision(currentYSpeed, currentXSpeed);
-        jumpTime++;
-    }
 
     public void reset() {
+
+
         setPosY(getDefaultPosY());
         setPosX(getDefaultPosX());
 
-        xSpeed = 1;
         currentXSpeed = 0;
 
         gravity = 0.5;

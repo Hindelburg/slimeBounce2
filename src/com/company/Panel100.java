@@ -4,8 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 
 import static jdk.nashorn.internal.objects.NativeMath.round;
@@ -68,7 +67,7 @@ class Panel00 extends JPanel {
         height = y;
         player = new Player("src\\sprites\\slimeStatic.png", 1200, -500, 1, 25);
         addEnemies();
-        addObjects();
+        loadLevel("tutorial");
         addBackgrounds();
 
         player.setObjects(objects);
@@ -88,6 +87,22 @@ class Panel00 extends JPanel {
         this.add(test, BorderLayout.CENTER);
     }
 
+    private void loadLevel(String name){
+        System.out.println("Loading.");
+        try{
+            BufferedReader r = new BufferedReader(new FileReader("lvl-"+name+".csv"));
+            String tmp = r.readLine();
+            while(!(tmp == null)){
+                String[] obj = tmp.split(",");
+                objects.add(new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3])));
+                tmp = r.readLine();
+            }
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
     private void addBackgrounds(){
         backgrounds.add(new Background("src\\sprites\\background.png", 10, 2, 0));
         backgrounds.add(new Background("src\\sprites\\background2.png", 5, 2, 400));
@@ -97,30 +112,6 @@ class Panel00 extends JPanel {
         //enemies.add(new Enemy("src\\sprites\\enemy.png", 1250 ,Math.floor(500), 2, 0.20));
         //enemies.add(new JumpingEnemy("src\\sprites\\enemy.png", 1250 ,Math.floor(500), 1, 1.50, 3));
         //enemies.add(new JumpingEnemy("src\\sprites\\enemy.png", 2250 ,Math.floor(500), 1, 0.50,5));
-    }
-
-    //Temporary, will be replaced by loading in a level.
-    private void addObjects(){
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1000, 3000, 50));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 2000, 3000, 50));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 3000, 3000, 50));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 4000, 3000, 50));
-
-
-        objects.add(new Obj("src\\sprites\\staticObject.png", 500, 500, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 540, 400, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 800, 500, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1000, 500, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", -200, 400, 5));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1500, 400, 6));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1250, 500, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1250, 100, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1500, 600, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1850, 400, 2));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 1800, 500, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 2200, 500, 3));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 2600, 500, 4));
-        objects.add(new Obj("src\\sprites\\staticObject.png", 3200, 500, 5));
     }
 
     private JPanel test = new JPanel() {
@@ -143,7 +134,6 @@ class Panel00 extends JPanel {
         for(Background b : backgrounds){
             double tmp3 = b.getPosX()-(bBox.getPosX()+bBox.getHitbox().width/2-width /2)/b.getDistance() % b.getHitbox().width;
             double tmp4 = b.getPosY()-(bBox.getPosY()-bBox.getHitbox().height/2-height/2)/b.getDistance();
-            //double tmp4 = (b.getPosY()-(((player.getPosY()-player.getDefaultPosY()))/b.getDistance()));
 
             //A somewhat crude repeating background algorithm.
             g.drawImage(b.getSprite(), (int) Math.floor(tmp3), (int) Math.floor(tmp4), null);
@@ -202,7 +192,6 @@ class Panel00 extends JPanel {
     }
 
     private void collision(){
-
         enemyCollision();
     }
 
@@ -238,7 +227,6 @@ class Panel00 extends JPanel {
             o.setPosY(o.getDefaultPosY());
         }
     }
-
 
     private class Key implements KeyListener {
         public void keyPressed(KeyEvent e){
