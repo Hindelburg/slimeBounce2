@@ -1,0 +1,47 @@
+
+  
+   ===           +++
+   ^               x
+ <   >   \   /   a   y
+   v               b
+
+
+
+BASIC CONTROLS: 
+"===" : Powerup wheel.
+"+++" : Dodge/Block.
+"\" : Combat mode.
+"/" : Pause.
+"a" : Attack.
+"b" : Jump.
+"y" : Throw.
+"x" : Grapple/Activate.
+"<" : Move left.
+">" : Move right.
+"v" : Crouch/Slide.
+"^" : Look up.
+
+COMBAT:
+Throw weapon.
+Attack.
+Grapple.
+Shove.
+
+
+
+WEAPONS:
+
+
+POWERUPS:
+
+
+
+
+
+
+
+
+Need a better collision system, one that isn't super taxing yet also isn't easy to break. Predictive lines were
+not great because they were easy to break but I think they were fairly efficient. To make it unbreakable would 
+probably make it just as bad if not worse than my current one. I could optimize my current one but I'm not sure
+if that would actually be a good idea, or just a waste of time. 

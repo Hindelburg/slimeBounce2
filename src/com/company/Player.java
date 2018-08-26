@@ -35,11 +35,8 @@ public class Player extends Placeable {
     private boolean canMoveLeft = true;
 
     private double maxSpeed = 10;
-    private double acc = 0.2;
+    private double acc = 0.6;
     public double floorPos = 0;
-
-    private ArrayList<Obj> objects = new ArrayList<>();
-
 
     private double jumpTime = 0;
 
@@ -104,6 +101,7 @@ public class Player extends Placeable {
 
     private void ySpeed() {
         currentYSpeed = currentYSpeed + gravity;
+
         if (canJump && tryJumping) {
             jumping = true;
             jumpTime = 0;
@@ -126,68 +124,52 @@ public class Player extends Placeable {
     }
 
 
-    private boolean overlaps(double x, double y){
+    private boolean overlaps(double x, double y, Obj o){
         Rectangle r = new Rectangle((int)Math.round(x), (int)Math.round(y), getHitbox().width, getHitbox().height);
-        for (Obj o : objects) {
-            if(r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().width, o.getHitbox().height)){
-                return false;
-            }
+        if(r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().width, o.getHitbox().height)){
+            return true;
         }
-        return true;
+        return false;
     }
 
 
-
     private void safeMove(){
-        double i = 0;
-        double newPos;
-        while(i <= Math.abs(currentXSpeed)){
-            if(currentXSpeed > 0) {
-                newPos = getPosX() + 0.01;
-                if(overlaps(newPos, getPosY())) {
-                    setPosX(newPos);
-                }
-                else{
-                    currentXSpeed = 0;
-                }
-            }
-            else if(currentXSpeed < 0) {
-                newPos = getPosX() - 0.01;
-                if(overlaps(newPos, getPosY())) {
-                    setPosX(newPos);
-                }
-                else{
-                    currentXSpeed = 0;
-                }
-            }
-            i = i + 0.01;
-        }
+        double pPosX = getPosX() + currentXSpeed;
+        double pPosY = getPosY() + currentYSpeed;
+        boolean g = false;
+        for (Obj o : Level.objects) {
+            if (overlaps(pPosX, pPosY, o)) {
+                double above = o.getPosY()-(getPosY()+getHitbox().height);
+                double below = getPosY()-(o.getPosY()+o.getHitbox().height);
+                double left = o.getPosX()-(getPosX()+getHitbox().width);
+                double right = getPosX()-(o.getPosX()+o.getHitbox().width);
 
-        i = 0;
-        while(i <= Math.abs(currentYSpeed)){
-            if(currentYSpeed > 0) {
-                newPos = getPosY() + 0.01;
-                if(overlaps(getPosX(), newPos)) {
-                    setPosY(newPos);
-                    inAir();
-                }
-                else{
+                if((above >= below) && (above >= left) && (above >= right)){
+                    pPosY = (o.getPosY()-getHitbox().height);
+                    currentYSpeed = 0;
                     onGround();
+                    g=true;
                 }
-            }
-            else {
-                newPos = getPosY() - 0.01;
-                if(overlaps(getPosX(), newPos)) {
-                    inAir();
-                    setPosY(newPos);
-                }
-                else{
+                else if((below >= above) && (below >= left) && (below >= right)){
+                    pPosY = o.getPosY()+o.getHitbox().height;
                     currentYSpeed = 0;
                     jumping = false;
                 }
+                else if((left >= above) && (left >= below) && (left >= right)){
+                    pPosX = (o.getPosX()-getHitbox().width);
+                    currentXSpeed = 0;
+                }
+                else{
+                    pPosX = o.getPosX()+o.getHitbox().width;
+                    currentXSpeed = 0;
+                }
             }
-            i = i + 0.01;
         }
+        if(!g){
+            inAir();
+        }
+        setPosX(pPosX);
+        setPosY(pPosY);
     }
 
     public class PlayerKey implements KeyListener {
@@ -259,10 +241,6 @@ public class Player extends Placeable {
         onGround = false;
     }
 
-    public void setObjects(ArrayList<Obj> objects) {
-        this.objects = objects;
-    }
-
 
     public void reset() {
 
@@ -289,7 +267,6 @@ public class Player extends Placeable {
         canMoveLeft = true;
 
         maxSpeed = 10;
-        acc = 0.2;
         floorPos = 0;
 
         jumpTime = 0;
