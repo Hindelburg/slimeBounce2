@@ -9,38 +9,8 @@ import java.util.ArrayList;
 
 import static jdk.nashorn.internal.objects.NativeMath.round;
 
-/*
-Story:
-    1. Who am I?
-    2. Hear of the Beast.
-    3. Something that, through the narrative, lets you know you must collect all the power ups.
-
-Enemies:
-
-Items:
-
-Powers:
-    1. High jump?
-    2. Wall stick.
-    3. Liquefy.
-    4. Electric field.
-    5. Parasite.
-
-Enemies:
-    1. Citizen. (Any unarmed person.)
-    2. Cop.
-    3. Riot cop.
-    4. Floating police drone.
-    MORE NEEDED!
-
-NOTES:
-    1. Localise the collision variables such as floor and ceiling to each entity so that much of the logic can be moved into their class and then physics can
-       be added to enemies through a super class.
-    2. Make background stuff its own class. DONE
-    3. Add support for multiple sprites and hitboxes for each entity.
-    4. Remake the game over method.
-    5. Make a menu.
-    6. Default positions for placeables. DONE
+/**
+ *
 */
 
 class Panel00 extends JPanel {
@@ -53,16 +23,15 @@ class Panel00 extends JPanel {
 
     private BoundingBox bBox;
 
-
     public Panel00(int x, int y){
         super();
         width = x;
         height = y;
 
-        Level.player = new Player("src\\sprites\\slimeStatic.png", 1200, -500, 1, 25);
-        addEnemies();
-        loadLevel("tutorial");
+        Level.player = new Player("src\\sprites\\slimeStatic.png", 1200, -500, 1, 25, 0.5, 7, 10, 0.6);
+        Level.loadLevel("tutorial");
         Level.addBackgrounds();
+        Level.addEnemies();
 
         bBox = new BoundingBox(400, 300);
 
@@ -79,28 +48,6 @@ class Panel00 extends JPanel {
         this.add(test, BorderLayout.CENTER);
     }
 
-    private void loadLevel(String name){
-        System.out.println("Loading.");
-        try{
-            BufferedReader r = new BufferedReader(new FileReader("lvl-"+name+".csv"));
-            String tmp = r.readLine();
-            while(!(tmp == null)){
-                String[] obj = tmp.split(",");
-                Level.objects.add(new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3])));
-                tmp = r.readLine();
-            }
-        }
-        catch (Exception e){
-            System.out.println(e.getMessage());
-        }
-    }
-
-
-    private void addEnemies(){
-        //enemies.add(new Enemy("src\\sprites\\enemy.png", 1250 ,Math.floor(500), 2, 0.20));
-        //enemies.add(new JumpingEnemy("src\\sprites\\enemy.png", 1250 ,Math.floor(500), 1, 1.50, 3));
-        //enemies.add(new JumpingEnemy("src\\sprites\\enemy.png", 2250 ,Math.floor(500), 1, 0.50,5));
-    }
 
     private JPanel test = new JPanel() {
         public void paintComponent(Graphics g) {
@@ -173,30 +120,14 @@ class Panel00 extends JPanel {
     private class Listener implements ActionListener {
         public void actionPerformed(ActionEvent e){
             if(mode.equals("game")) {
-                collision();
                 test.repaint();
+                fall();
             }
         }
     }
 
-    private void collision(){
-        enemyCollision();
-    }
-
-
-
-    private void enemyCollision(){
-        for(Enemy e : Level.enemies){
-            boolean tmp1 = (e.getPosY() <= Level.player.getPosY() + Level.player.getHitbox().height) && ((e.getPosY() + e.getHitbox().height) >= Level.player.getPosY());
-            boolean tmp2 = (e.getPosX() <= Level.player.getPosX() + Level.player.getHitbox().width) && ((e.getPosX() + e.getHitbox().width) >= Level.player.getPosX());
-            if(tmp1 && tmp2){
-                System.out.println("DEAD!");
-                gameover();
-            }
-        }
-        //This should not be hardcoded in the end.
-        if(Level.player.getPosY() > 800){
-            System.out.println("DEAD!");
+    private void fall(){
+        if(Level.player.getPosY() > Level.deathLevel){
             gameover();
         }
     }
@@ -207,8 +138,7 @@ class Panel00 extends JPanel {
         Level.player.reset();
 
         for(Enemy i : Level.enemies){
-            i.setPosX(i.getDefaultPosX());
-            i.setPosY(i.getDefaultPosY());
+            i.reset();
         }
         for(Obj o : Level.objects){
             o.setPosX(o.getDefaultPosX());
@@ -231,6 +161,10 @@ class Panel00 extends JPanel {
                     Level.player.reset();
                     mode = "game";
                     Level.player.active = true;
+                    for (Enemy enemy : Level.enemies) {
+                        enemy.tryJumping = true;
+                        enemy.active = true;
+                    }
                 }
             }
         }
