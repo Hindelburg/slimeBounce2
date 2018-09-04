@@ -11,6 +11,5 @@ import java.io.File;
 public class Enemy extends Entity{
     public Enemy(String pSprite, double posX, double posY, double scale, double maxJumpTime, double gravity, double jumpSpeed, double maxSpeed, double acc) {
         super(pSprite, posX, posY, scale, maxJumpTime, gravity, jumpSpeed, maxSpeed, acc);
-        tryJumping = true;
     }
 }

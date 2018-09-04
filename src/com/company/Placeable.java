@@ -9,35 +9,14 @@ import java.util.ArrayList;
 public class Placeable {
     private double defaultPosX;
     private double defaultPosY;
-    private double posX;
-    private double posY;
-    private double scale;
+    private double posX, posY;
     private Size hitbox;
-    private BufferedImage tmpSprites;
-    private Image sprites;
 
-    public Placeable(String pSprite, double pPosX, double pPosY, double pScale){
-        loadSprite(pSprite);
+    public Placeable(double pPosX, double pPosY){
         posX = pPosX;
-        scale = pScale;
-        hitbox = new Size((int)Math.floor(tmpSprites.getWidth()*scale), (int)Math.floor((tmpSprites.getHeight()*scale)));
-        posY = pPosY-hitbox.height;
-        sprites = tmpSprites.getScaledInstance(hitbox.width,hitbox.height, Image.SCALE_DEFAULT);
+        posY = pPosY;
         defaultPosX = posX;
         defaultPosY = posY;
-    }
-
-    private void loadSprite(String s){
-        try {
-            tmpSprites = ImageIO.read(new File(s));
-        }
-        catch(Exception e){
-            System.out.println("ERROR");
-        }
-    }
-
-    public Image getSprite(){
-        return sprites;
     }
 
     public double getPosX() {
@@ -66,5 +45,8 @@ public class Placeable {
 
     public Size getHitbox(){
         return hitbox;
+    }
+    public void setHitbox(Size hitbox){
+        this.hitbox = hitbox;
     }
 }

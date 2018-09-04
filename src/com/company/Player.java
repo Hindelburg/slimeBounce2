@@ -77,5 +77,10 @@ public class Player extends Entity {
             left = false;
         }
     }
+
+    @Override
+    public void death(){
+        Level.gameover();
+    }
 }
 

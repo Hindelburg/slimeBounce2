@@ -21,15 +21,21 @@ BASIC CONTROLS:
 "v" : Crouch/Slide.
 "^" : Look up.
 
-COMBAT:
-Throw weapon.
-Attack.
-Grapple.
-Shove.
 
+COMBAT:
+	Throw weapon.
+	Attack.
+	Grapple.
+	Shove.
 
 
 WEAPONS:
+	regular pistol
+	regular rifle
+	energy pistol
+	energy rifle
+	sniper rifle
+	smg
 
 
 POWERUPS:
@@ -38,10 +44,28 @@ POWERUPS:
 
 
 
+MOST IMPORTANT THINGS TO DO:
+	Create collections, and have entities be superclasses of that. Will not be simple because 
+		it has to consist of different types of objects, yet still have some things as a whole, such as 
+		position, health, etc.
+	Limit midair control.
+	Create entity health.
 
 
 
-Need a better collision system, one that isn't super taxing yet also isn't easy to break. Predictive lines were
-not great because they were easy to break but I think they were fairly efficient. To make it unbreakable would 
-probably make it just as bad if not worse than my current one. I could optimize my current one but I'm not sure
-if that would actually be a good idea, or just a waste of time. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

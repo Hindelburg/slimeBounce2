@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-public class Entity extends Placeable{
+public class Entity extends Visual{
     private double maxJumpTime;
 
     private static final int PLACES = 2;
@@ -25,6 +25,10 @@ public class Entity extends Placeable{
     protected boolean right = false;
     protected boolean left = false;
     protected boolean tryJumping = false;
+
+    private double pPosX;
+    private double pPosY;
+
 
     private double maxSpeed;
     private double acc;
@@ -100,38 +104,30 @@ public class Entity extends Placeable{
         }
     }
 
-
-
     private boolean overlaps(double x, double y, Obj o){
         Rectangle r = new Rectangle((int)Math.round(x), (int)Math.round(y), getHitbox().width, getHitbox().height);
         return (r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().width, o.getHitbox().height));
     }
 
     private void safeMove(){
-        double pPosX = getPosX() + currentXSpeed;
-        double pPosY = getPosY() + currentYSpeed;
-        boolean g = false;
+        pPosX = getPosX() + currentXSpeed;
+        pPosY = getPosY() + currentYSpeed;
+        onGround = false;
         for (Obj o : Level.objects) {
             if (overlaps(pPosX, pPosY, o)) {
-                double above = o.getPosY()-(getPosY()+getHitbox().height);
-                double below = getPosY()-(o.getPosY()+o.getHitbox().height);
-                double left = o.getPosX()-(getPosX()+getHitbox().width);
-                double right = getPosX()-(o.getPosX()+o.getHitbox().width);
+                double above = o.getPosY() - (getPosY() + getHitbox().height);
+                double below = getPosY() - (o.getPosY() + o.getHitbox().height);
+                double left = o.getPosX() - (getPosX() + getHitbox().width);
+                double right = getPosX() - (o.getPosX() + o.getHitbox().width);
 
-                if((above >= below) && (above >= left) && (above >= right)){
-                    pPosY = (o.getPosY()-getHitbox().height);
-                    currentYSpeed = 0;
-                    onGround();
-                    g=true;
-                }
-                else if((below >= left) && (below >= right)){
-                    pPosY = o.getPosY()+o.getHitbox().height;
-                    currentYSpeed = 0;
-                    jumping = false;
+                if((above >= below) && (above >= left) && (above >= right)) {
+                    onGroundCollision(o);
+                } else if ((below >= left) && (below >= right)) {
+                    hitHeadCollision(o);
                 }
             }
         }
-        if(!g){
+        if(!onGround){
             inAir();
         }
         for (Obj o : Level.objects) {
@@ -140,13 +136,12 @@ public class Entity extends Placeable{
                 double below = getPosY()-(o.getPosY()+o.getHitbox().height);
                 double left = o.getPosX()-(getPosX()+getHitbox().width);
                 double right = getPosX()-(o.getPosX()+o.getHitbox().width);
+
                 if((left >= below) && (left >= above) && (left >= right)){
-                    pPosX = (o.getPosX()-getHitbox().width);
-                    currentXSpeed = 0;
+                    hitRight(o);
                 }
                 else if((right >= below) && (right >= above)){
-                    pPosX = o.getPosX()+o.getHitbox().width;
-                    currentXSpeed = 0;
+                    hitLeft(o);
                 }
             }
         }
@@ -154,15 +149,57 @@ public class Entity extends Placeable{
         setPosY(pPosY);
     }
 
-    public void onGround() {
-        jumping = false;
-        jumpTime = 0;
-        onGround = true;
-        currentYSpeed = 0;
+    public void hitRight(Obj o){
+        if(o.collision == 0) {
+            currentXSpeed = 0;
+            pPosX = (o.getPosX() - getHitbox().width);
+        }
+        if(o instanceof DamageObj){
+            death();
+        }
+    }
+
+    public void hitLeft(Obj o){
+        if(o.collision == 0) {
+            currentXSpeed = 0;
+            pPosX = (o.getPosX() + o.getHitbox().width);
+        }
+        if(o instanceof DamageObj){
+            death();
+        }
+    }
+
+    public void onGroundCollision(Obj o) {
+        if(o.collision == 0) {
+            currentYSpeed = 0;
+            jumping = false;
+            jumpTime = 0;
+            onGround = true;
+            currentYSpeed = 0;
+            pPosY = (o.getPosY() - getHitbox().height);
+        }
+        if(o instanceof DamageObj){
+            death();
+        }
+    }
+
+    public void hitHeadCollision(Obj o) {
+        if(o.collision == 0) {
+            currentYSpeed = 0;
+            jumping = false;
+            pPosY = (o.getPosY() + o.getHitbox().height);
+        }
+        if(o instanceof DamageObj){
+            death();
+        }
     }
 
     public void inAir() {
         onGround = false;
+    }
+
+    public void death(){
+        active = false;
     }
 
     public void reset() {

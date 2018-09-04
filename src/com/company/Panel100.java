@@ -19,7 +19,7 @@ class Panel00 extends JPanel {
     private double height;
     private double width;
 
-    private String mode = "menu";
+    public static String mode = "menu";
 
     private BoundingBox bBox;
 
@@ -62,7 +62,7 @@ class Panel00 extends JPanel {
         }
     };
 
-    //Handles the background painting.
+    //Handles the background painting. Probably should be updated.
     private void paintBackground(Graphics g){
         super.paintComponent(g);
 
@@ -83,7 +83,6 @@ class Panel00 extends JPanel {
     }
 
     private void paintGame(Graphics g){
-        super.paintComponent(g);
         setOpaque(false);
 
         //Might refactor to a new location, unsure.
@@ -119,7 +118,7 @@ class Panel00 extends JPanel {
     //The background workers.
     private class Listener implements ActionListener {
         public void actionPerformed(ActionEvent e){
-            if(mode.equals("game")) {
+            if(mode.equals("game")){
                 test.repaint();
                 fall();
             }
@@ -128,23 +127,10 @@ class Panel00 extends JPanel {
 
     private void fall(){
         if(Level.player.getPosY() > Level.deathLevel){
-            gameover();
+            Level.gameover();
         }
     }
 
-    //This should all be changed eventually.
-    private void gameover(){
-        mode = "menu";
-        Level.player.reset();
-
-        for(Enemy i : Level.enemies){
-            i.reset();
-        }
-        for(Obj o : Level.objects){
-            o.setPosX(o.getDefaultPosX());
-            o.setPosY(o.getDefaultPosY());
-        }
-    }
 
     private class Key implements KeyListener {
         public void keyPressed(KeyEvent e){
@@ -162,7 +148,6 @@ class Panel00 extends JPanel {
                     mode = "game";
                     Level.player.active = true;
                     for (Enemy enemy : Level.enemies) {
-                        enemy.tryJumping = true;
                         enemy.active = true;
                     }
                 }

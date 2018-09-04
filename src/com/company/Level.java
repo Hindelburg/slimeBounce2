@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Level {
+    //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON.
+
     public static Sounds music = new Sounds("src\\sprites\\music.wav");
 
     public static ArrayList<Enemy> enemies = new ArrayList<>();
@@ -19,17 +21,15 @@ public class Level {
         Level.backgrounds.add(new Background("src\\sprites\\background.png", 10, 2, 0));
         Level.backgrounds.add(new Background("src\\sprites\\background2.png", 5, 2, 400));
     }
-    private static Random r = new Random();
 
     public static void addEnemies(){
-        for(int i = 200; i <= 5000; i=i+10) {
-            int i2 = 100+r.nextInt(500);
-            int i3 = 10+r.nextInt(30);
-            Level.enemies.add(new Enemy("src\\sprites\\slimeStatic.png", i, i2, 1, i3, 0.5, 7, 10, 0.6));
-        }
+        Level.enemies.add(new Enemy("src\\sprites\\slimeStatic.png", 3000, 0, 1, 10, 0.5, 7, 10, 0.6));
+
+
+        objects.add(new DamageObj("src\\sprites\\enemy.png", 4000, 450, 3, 1, 1, 10));
     }
 
-
+    //Must be modified in future.
     public static void loadLevel(String name){
         System.out.println("Loading.");
         try{
@@ -37,12 +37,25 @@ public class Level {
             String tmp = r.readLine();
             while(!(tmp == null)){
                 String[] obj = tmp.split(",");
-                objects.add(new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3])));
+                objects.add(new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3]),0));
                 tmp = r.readLine();
             }
         }
         catch (Exception e){
             System.out.println(e.getMessage());
+        }
+    }
+
+    public static void gameover(){
+        Panel00.mode = "menu";
+        player.reset();
+
+        for(Enemy i : enemies){
+            i.reset();
+        }
+        for(Obj o : objects){
+            o.setPosX(o.getDefaultPosX());
+            o.setPosY(o.getDefaultPosY());
         }
     }
 }
