@@ -1,13 +1,7 @@
 package com.company;
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.ArrayList;
-
-import static jdk.nashorn.internal.objects.NativeMath.round;
 
 /**
  *
@@ -45,11 +39,11 @@ class Panel00 extends JPanel {
         addKeyListener(new Key());
         setFocusable(true);
         this.setLayout(new BorderLayout());
-        this.add(test, BorderLayout.CENTER);
+        this.add(painter, BorderLayout.CENTER);
     }
 
 
-    private JPanel test = new JPanel() {
+    private JPanel painter = new JPanel() {
         public void paintComponent(Graphics g) {
             super.paintComponent(g);
             paintBackground(g);
@@ -119,7 +113,7 @@ class Panel00 extends JPanel {
     private class Listener implements ActionListener {
         public void actionPerformed(ActionEvent e){
             if(mode.equals("game")){
-                test.repaint();
+                painter.repaint();
                 fall();
             }
         }

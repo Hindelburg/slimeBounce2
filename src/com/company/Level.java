@@ -3,7 +3,6 @@ package com.company;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.Random;
 
 public class Level {
     //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON.
@@ -14,6 +13,7 @@ public class Level {
     public static ArrayList<Obj> objects = new ArrayList<>();
     public static ArrayList<Background> backgrounds = new ArrayList<>();
     public static int deathLevel = 1000;
+    public static Light light;
 
     public static Player player;
 
@@ -23,9 +23,9 @@ public class Level {
     }
 
     public static void addEnemies(){
-        Level.enemies.add(new Enemy("src\\sprites\\slimeStatic.png", 3000, 0, 1, 10, 0.5, 7, 10, 0.6));
+        Level.enemies.add(new Enemy("src\\sprites\\slimeStatic.png", 1000, 0, 1, 10, 0.5, 7, 10, 0.6));
 
-
+        light = new Light(1000, 400, 100);
         objects.add(new DamageObj("src\\sprites\\enemy.png", 4000, 450, 3, 1, 1, 10));
     }
 

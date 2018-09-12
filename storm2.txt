@@ -1,0 +1,16 @@
+paint whole thing black or whatever.
+for each pixal in image
+	calculate relative pixel position.
+	using this calculate distance from light position.
+	bring back light to pixels based off their distance.
+
+Lets try the first way first, it should be easier to code and easier to do the second way once I've done it once.
+
+DOES IT HAVE TO BE THIS WAY, OR COULD I IMPROVE IT?
+
+paint whole thing black or whatever.
+somehow loop through based off distance and then stop when reaches out of distance.
+
+
+
+

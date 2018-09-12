@@ -1,7 +1,5 @@
 package com.company;
 
-import java.awt.*;
-
 public class BoundingBox {
     private double posX = 0;
     private double posY = 0;

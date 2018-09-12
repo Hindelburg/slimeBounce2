@@ -1,17 +1,8 @@
 package com.company;
 
-import org.w3c.dom.css.Rect;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.geom.Line2D;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.ArrayList;
+
 
 public class Player extends Entity {
 

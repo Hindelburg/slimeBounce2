@@ -1,11 +1,5 @@
 package com.company;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-
 public class Placeable {
     private double defaultPosX;
     private double defaultPosY;
