@@ -77,6 +77,9 @@ class Panel00 extends JPanel {
     }
 
     private void paintGame(Graphics g){
+        for(Light light : Level.lights) {
+            //light.strobe();//////////////////////////////////////////
+        }
         setOpaque(false);
 
         //Might refactor to a new location, unsure.
@@ -93,21 +96,34 @@ class Panel00 extends JPanel {
         if(((bBox.getPosX() + bBox.getHitbox().width) < Level.player.getPosX()+Level.player.getHitbox().width)){
             bBox.setPosX(Level.player.getPosX()+(Level.player.getHitbox().width-bBox.getHitbox().width));
         }
-        //Center of bounding box.
-        double tmp1 = bBox.getPosX()+bBox.getHitbox().width/2-width /2;
+        //Drawing offset.
+        double tmp1 = bBox.getPosX()+bBox.getHitbox().width/2-width/2;
         double tmp2 = bBox.getPosY()+bBox.getHitbox().height/2-height/2;
+        //Center of bounding box.
+        double test1 = bBox.getPosX()+bBox.getHitbox().width/2;
+        double test2 = bBox.getPosY()+bBox.getHitbox().height/2;
 
-        g.drawImage(Level.player.getSprite(), (int) Math.floor(Level.player.getPosX()-tmp1), (int) Math.floor(Level.player.getPosY()-tmp2), null);
+        g.drawImage(Level.player.getSprite(test1, test2), (int) Math.floor(Level.player.getPosX()-tmp1), (int) Math.floor(Level.player.getPosY()-tmp2), null);
 
         //ENEMIES!
         for(Enemy e : Level.enemies){
-            g.drawImage(e.getSprite(), (int) Math.floor(e.getPosX()-tmp1), (int) Math.floor(e.getPosY()-tmp2), null);
+            if(onScreen(e, test1, test2)) {
+                g.drawImage(e.getSprite(test1, test2), (int) Math.floor(e.getPosX() - tmp1), (int) Math.floor(e.getPosY() - tmp2), null);
+            }
         }
         //OBJECTS!
         for(Obj o : Level.objects){
-            g.drawImage(o.getSprite(), (int) Math.floor(o.getPosX()-tmp1), (int) Math.floor(o.getPosY()-tmp2), null);
+            if(onScreen(o, test1, test2)) {
+                g.drawImage(o.getSprite(test1, test2), (int) Math.floor(o.getPosX() - tmp1), (int) Math.floor(o.getPosY() - tmp2), null);
+            }
+
         }
     }
+
+    private boolean onScreen(Visual o, double xc, double yc){
+        return !(((yc-(height/2) > o.getPosY()+o.getHitbox().height)) || ((yc+(height/2)) < o.getPosY()) || ((xc-(width/2) > o.getPosX()+o.getHitbox().width)) || ((xc+(width/2)) < o.getPosX()));
+    }
+
 
     //The background workers.
     private class Listener implements ActionListener {

@@ -1,7 +1,7 @@
-src\sprites\staticObject.png,1000,850,50,0
-src\sprites\staticObject.png,2000,800,50,0
-src\sprites\staticObject.png,3000,750,50,0
-src\sprites\staticObject.png,4000,700,50,0
+src\sprites\staticObject.png,1000,850,2,0
+src\sprites\staticObject.png,2000,800,2,0
+src\sprites\staticObject.png,3000,750,2,0
+src\sprites\staticObject.png,4000,700,2,0
 src\sprites\staticObject.png,500,700,3,0
 src\sprites\staticObject.png,540,450,3,0
 src\sprites\staticObject.png,800,350,3,0

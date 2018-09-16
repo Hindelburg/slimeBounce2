@@ -1,5 +1,6 @@
 package com.company;
 
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class Level {
     public static ArrayList<Obj> objects = new ArrayList<>();
     public static ArrayList<Background> backgrounds = new ArrayList<>();
     public static int deathLevel = 1000;
-    public static Light light;
+    public static ArrayList<Light> lights = new ArrayList<>();
 
     public static Player player;
 
@@ -25,7 +26,11 @@ public class Level {
     public static void addEnemies(){
         Level.enemies.add(new Enemy("src\\sprites\\slimeStatic.png", 1000, 0, 1, 10, 0.5, 7, 10, 0.6));
 
-        light = new Light(1000, 400, 100);
+        lights.add(new Light(1000, 400, 800, new Color(75, 219, 255)));
+        //lights.add(new Light(1500, 400, 800, new Color(255, 0, 0)));
+        //lights.add(new Light(1250, 100, 800, new Color(0, 255, 0)));
+
+
         objects.add(new DamageObj("src\\sprites\\enemy.png", 4000, 450, 3, 1, 1, 10));
     }
 
