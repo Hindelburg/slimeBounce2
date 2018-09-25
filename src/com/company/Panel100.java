@@ -4,14 +4,16 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- *
+ * We now have a bug where you can get a jump by clipping into the wall kinda I guess. Happens where two Objs overlap or stack or something.
 */
 
 class Panel00 extends JPanel {
     private Timer t = new Timer(1, new Listener());
+    private Timer framerateCounter = new Timer(1, new Frames());
 
     private double height;
     private double width;
+    private int framesPassed = 0;
 
     public static String mode = "menu";
 
@@ -32,6 +34,9 @@ class Panel00 extends JPanel {
         t.setDelay(10);
         t.start();
 
+        framerateCounter.setDelay(10000);//every ten seconds
+        framerateCounter.start();
+
         Level.music.loop();
 
         addKeyListener(Level.player.getPlayerKey());
@@ -40,8 +45,30 @@ class Panel00 extends JPanel {
         setFocusable(true);
         this.setLayout(new BorderLayout());
         this.add(painter, BorderLayout.CENTER);
+
+        for(Visual o : Level.objects){
+            o.lightingUpdate();
+        }
     }
 
+
+    //The background workers.
+    private class Listener implements ActionListener {
+        public void actionPerformed(ActionEvent e){
+            if(mode.equals("game")){
+                framesPassed++;
+                painter.repaint();
+                fall();//this doesn't belong here...
+            }
+        }
+    }
+
+    private class Frames implements ActionListener {
+        public void actionPerformed(ActionEvent e){
+            System.out.println(framesPassed/10 + "/100 frames per second.");
+            framesPassed = 0;
+        }
+    }
 
     private JPanel painter = new JPanel() {
         public void paintComponent(Graphics g) {
@@ -61,13 +88,18 @@ class Panel00 extends JPanel {
         super.paintComponent(g);
 
         for(Background b : Level.backgrounds){
-            double tmp3 = b.getPosX()-(bBox.getPosX()+bBox.getHitbox().width/2-width /2)/b.getDistance() % b.getHitbox().width;
-            double tmp4 = b.getPosY()-(bBox.getPosY()-bBox.getHitbox().height/2-height/2)/b.getDistance();
+            if(b.getDistance() != -1) {
+                double tmp3 = b.getPosX() - (bBox.getPosX() + bBox.getHitbox().getWidth() / 2 - width / 2) / b.getDistance() % b.getHitbox().getWidth();
+                double tmp4 = b.getPosY() - (bBox.getPosY() - bBox.getHitbox().getHeight() / 2 - height / 2) / b.getDistance();
 
-            //A somewhat crude repeating background algorithm.
-            g.drawImage(b.getSprite(), (int) Math.floor(tmp3), (int) Math.floor(tmp4), null);
-            g.drawImage(b.getSprite(), (int) Math.floor(tmp3-b.getHitbox().width), (int) Math.floor(tmp4), null);
-            g.drawImage(b.getSprite(), (int) Math.floor(tmp3+b.getHitbox().width), (int) Math.floor(tmp4), null);
+                //A somewhat crude repeating background algorithm.
+                g.drawImage(b.getSprite(), (int) Math.floor(tmp3), (int) Math.floor(tmp4), null);
+                g.drawImage(b.getSprite(), (int) Math.floor(tmp3 - b.getHitbox().getWidth()), (int) Math.floor(tmp4), null);
+                g.drawImage(b.getSprite(), (int) Math.floor(tmp3 + b.getHitbox().getWidth()), (int) Math.floor(tmp4), null);
+            }
+            else{
+                g.drawImage(b.getSprite(), 0, 0, null);
+            }
         }
     }
 
@@ -77,9 +109,13 @@ class Panel00 extends JPanel {
     }
 
     private void paintGame(Graphics g){
-        for(Light light : Level.lights) {
-            //light.strobe();//////////////////////////////////////////
-        }
+        Level.lights[0].setPos(Level.player.getPosX(), Level.player.getPosY());//super temporary, this type of stuff will be handled by collections once those are implemented in the devtools. !TMP
+
+
+
+
+
+
         setOpaque(false);
 
         //Might refactor to a new location, unsure.
@@ -87,21 +123,21 @@ class Panel00 extends JPanel {
         if((bBox.getPosY() > Level.player.getPosY())){
             bBox.setPosY(Level.player.getPosY());
         }
-        if(((bBox.getPosY() + bBox.getHitbox().height) < Level.player.getPosY()+Level.player.getHitbox().height)){
-            bBox.setPosY(Level.player.getPosY()+(Level.player.getHitbox().height-bBox.getHitbox().height));
+        if(((bBox.getPosY() + bBox.getHitbox().getHeight()) < Level.player.getPosY()+Level.player.getHitbox().getHeight())){
+            bBox.setPosY(Level.player.getPosY()+(Level.player.getHitbox().getHeight()-bBox.getHitbox().getHeight()));
         }
         if((bBox.getPosX() > Level.player.getPosX())){
             bBox.setPosX(Level.player.getPosX());
         }
-        if(((bBox.getPosX() + bBox.getHitbox().width) < Level.player.getPosX()+Level.player.getHitbox().width)){
-            bBox.setPosX(Level.player.getPosX()+(Level.player.getHitbox().width-bBox.getHitbox().width));
+        if(((bBox.getPosX() + bBox.getHitbox().getWidth()) < Level.player.getPosX()+Level.player.getHitbox().getWidth())){
+            bBox.setPosX(Level.player.getPosX()+(Level.player.getHitbox().getWidth()-bBox.getHitbox().getWidth()));
         }
         //Drawing offset.
-        double tmp1 = bBox.getPosX()+bBox.getHitbox().width/2-width/2;
-        double tmp2 = bBox.getPosY()+bBox.getHitbox().height/2-height/2;
+        double tmp1 = bBox.getPosX()+bBox.getHitbox().getWidth()/2-width/2;
+        double tmp2 = bBox.getPosY()+bBox.getHitbox().getHeight()/2-height/2;
         //Center of bounding box.
-        double test1 = bBox.getPosX()+bBox.getHitbox().width/2;
-        double test2 = bBox.getPosY()+bBox.getHitbox().height/2;
+        double test1 = bBox.getPosX()+bBox.getHitbox().getWidth()/2;
+        double test2 = bBox.getPosY()+bBox.getHitbox().getHeight()/2;
 
         g.drawImage(Level.player.getSprite(test1, test2), (int) Math.floor(Level.player.getPosX()-tmp1), (int) Math.floor(Level.player.getPosY()-tmp2), null);
 
@@ -116,24 +152,14 @@ class Panel00 extends JPanel {
             if(onScreen(o, test1, test2)) {
                 g.drawImage(o.getSprite(test1, test2), (int) Math.floor(o.getPosX() - tmp1), (int) Math.floor(o.getPosY() - tmp2), null);
             }
-
         }
     }
 
     private boolean onScreen(Visual o, double xc, double yc){
-        return !(((yc-(height/2) > o.getPosY()+o.getHitbox().height)) || ((yc+(height/2)) < o.getPosY()) || ((xc-(width/2) > o.getPosX()+o.getHitbox().width)) || ((xc+(width/2)) < o.getPosX()));
+        return !(((yc-(height/2) > o.getPosY()+o.getHitbox().getHeight())) || ((yc+(height/2)) < o.getPosY()) || ((xc-(width/2) > o.getPosX()+o.getHitbox().getWidth())) || ((xc+(width/2)) < o.getPosX()));
     }
 
 
-    //The background workers.
-    private class Listener implements ActionListener {
-        public void actionPerformed(ActionEvent e){
-            if(mode.equals("game")){
-                painter.repaint();
-                fall();
-            }
-        }
-    }
 
     private void fall(){
         if(Level.player.getPosY() > Level.deathLevel){

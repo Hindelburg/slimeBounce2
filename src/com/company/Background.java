@@ -19,7 +19,7 @@ public class Background {
         distance = pDistance;
         posY = y;
         hitbox = new Size((int)Math.floor(sprite.getWidth()*scale), (int)Math.floor((sprite.getHeight()*scale)));
-        test = sprite.getScaledInstance(hitbox.width, hitbox.height, Image.SCALE_DEFAULT);
+        test = sprite.getScaledInstance(hitbox.getWidth(), hitbox.getHeight(), Image.SCALE_DEFAULT);
     }
 
     private void loadSprite(String s){

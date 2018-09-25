@@ -3,56 +3,61 @@ package com.company;
 import java.awt.*;
 
 public class Light extends Placeable {
-    int radius;
-    int radius2;
-    int brightness;
-    public Color color;
+    private int radius;
+    private int brightness;
+    private Color color;
 
     public Light(double posX, double posY, int radius, Color color){
         super(posX, posY);
         this.radius = radius;
         this.color = color;
-        radius2 = radius;
     }
 
-
-    public int withinRadius(double posX1, double posY1){
-        return distance(posX1, posY1, getPosX(), getPosY());
+    public void setPos(double posX, double posY) {
+        double tmp1 = getPosX();
+        double tmp2 = getPosY();
+        super.setPosX(posX);
+        super.setPosY(posY);
+        lightingUpdate(tmp1, tmp2);
+        lightingUpdate(posX, posY);
     }
 
-    private int distance(double posX1, double posY1, double posX2, double posY2){
-        return (int)Math.sqrt(square(posX2-posX1) + square(posY2-posY1));
+    private void lightingUpdate(double posX, double posY){
+        for(Visual v : Level.objects){
+            int x = (int)getPosX()-radius;
+            int y = (int)getPosY()-radius;
+            if(overlaps(x, y, radius*2, v)){
+                v.lightingUpdate();
+            }
+        }
+    }
+
+    private boolean overlaps(int x, int y, int width, Visual o){
+        Rectangle r = new Rectangle((x), (y), width, width);
+        return (r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().getWidth(), o.getHitbox().getHeight()));
+    }
+
+    public double withinRadius(double posX1, double posY1){
+        double distance = distance(posX1, posY1, getPosX(), getPosY());
+        double fakeRad = square(radius);
+        if(distance > fakeRad){
+            return -1;
+        }
+        else{
+            return (((fakeRad-distance))/(fakeRad));
+        }
+    }
+
+    //I should be squaring but I'm not and later multiplying to increase efficiency.
+    private double distance(double posX1, double posY1, double posX2, double posY2){
+        return (square(posX2-posX1) + square(posY2-posY1));
     }
 
     private double square(double value){
         return value * value;
     }
 
-    public void strobe(){
-        if (radius == 0) {
-            radius = radius2;
-        }
-        else{
-            radius = 0;
-        }
-    }
-
-    public void fade(){
-        int r = color.getRed();
-        int g = color.getGreen();
-        int b = color.getBlue();
-        if(r > 0 && b == 0){
-            r--;
-            g++;
-        }
-        if(g > 0 && r == 0){
-            g--;
-            b++;
-        }
-        if(b > 0 && g == 0){
-            r++;
-            b--;
-        }
-        color = new Color(r,g,b);
+    public Color getColor() {
+        return color;
     }
 }

@@ -4,46 +4,53 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Level {
-    //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON.
+    //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON,
+    //ONCE THE DEVTOOLS ARE UP TO DATE WHICH SHOULD HAPPEN ONCE LIGHTING IS DONE.
 
     public static Sounds music = new Sounds("src\\sprites\\music.wav");
+    //I'm gonna have to make this better once devtools are done...
+    public static Enemy[] enemies = new Enemy[1];
 
-    public static ArrayList<Enemy> enemies = new ArrayList<>();
-    public static ArrayList<Obj> objects = new ArrayList<>();
-    public static ArrayList<Background> backgrounds = new ArrayList<>();
+    public static Obj[] objects = new Obj[18];
+    public static Background[] backgrounds = new Background[3];
     public static int deathLevel = 1000;
-    public static ArrayList<Light> lights = new ArrayList<>();
+    public static Light[] lights = new Light[1];
 
     public static Player player;
 
     public static void addBackgrounds(){
-        Level.backgrounds.add(new Background("src\\sprites\\background.png", 10, 2, 0));
-        Level.backgrounds.add(new Background("src\\sprites\\background2.png", 5, 2, 400));
+        Level.backgrounds[0] = (new Background("src\\sprites\\background3.png", 0, 2, 0));
+
+        Level.backgrounds[1] = (new Background("src\\sprites\\background.png", 10, 2, 0));
+        Level.backgrounds[2] = (new Background("src\\sprites\\background2.png", 5, 2, 400));
     }
 
     public static void addEnemies(){
-        Level.enemies.add(new Enemy("src\\sprites\\slimeStatic.png", 1000, 0, 1, 10, 0.5, 7, 10, 0.6));
+        Level.enemies[0] = (new Enemy("src\\sprites\\slimeStatic.png", 1000, 0, 1, 10, 0.5, 7, 10, 0.6));
 
-        lights.add(new Light(1000, 400, 800, new Color(75, 219, 255)));
-        //lights.add(new Light(1500, 400, 800, new Color(255, 0, 0)));
-        //lights.add(new Light(1250, 100, 800, new Color(0, 255, 0)));
+        //Not enemies in any way at all but since all of this will be gone soon, might as well put it here.
+        //lights.add(new Light(1000, 400, 600, new Color(124, 196, 255)));
+        //lights.add(new Light(1600, 400, 600, new Color(255, 252, 137)));
+        //lights.add(new Light(2200, 400, 600, new Color(155, 126, 169)));
 
-
-        objects.add(new DamageObj("src\\sprites\\enemy.png", 4000, 450, 3, 1, 1, 10));
+        lights[0] = (new Light(1000, 400, 200, new Color(196, 70, 95)));
     }
 
     //Must be modified in future.
     public static void loadLevel(String name){
         System.out.println("Loading.");
+        int stupid = 0;
         try{
             BufferedReader r = new BufferedReader(new FileReader("lvl-"+name+".csv"));
             String tmp = r.readLine();
             while(!(tmp == null)){
                 String[] obj = tmp.split(",");
-                objects.add(new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3]),0));
+                objects[stupid] = (new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3]),0));
                 tmp = r.readLine();
+                stupid++;
             }
         }
         catch (Exception e){

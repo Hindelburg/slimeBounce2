@@ -105,8 +105,8 @@ public class Entity extends Visual{
     }
 
     private boolean overlaps(double x, double y, Obj o){
-        Rectangle r = new Rectangle((int)Math.round(x), (int)Math.round(y), getHitbox().width, getHitbox().height);
-        return (r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().width, o.getHitbox().height));
+        Rectangle r = new Rectangle((int)Math.round(x), (int)Math.round(y), getHitbox().getWidth(), getHitbox().getHeight());
+        return (r.intersects(o.getPosX(), o.getPosY(), o.getHitbox().getWidth(), o.getHitbox().getHeight()));
     }
 
     private void safeMove(){
@@ -115,10 +115,10 @@ public class Entity extends Visual{
         onGround = false;
         for (Obj o : Level.objects) {
             if (overlaps(pPosX, pPosY, o)) {
-                double above = o.getPosY() - (getPosY() + getHitbox().height);
-                double below = getPosY() - (o.getPosY() + o.getHitbox().height);
-                double left = o.getPosX() - (getPosX() + getHitbox().width);
-                double right = getPosX() - (o.getPosX() + o.getHitbox().width);
+                double above = o.getPosY() - (getPosY() + getHitbox().getHeight());
+                double below = getPosY() - (o.getPosY() + o.getHitbox().getHeight());
+                double left = o.getPosX() - (getPosX() + getHitbox().getWidth());
+                double right = getPosX() - (o.getPosX() + o.getHitbox().getWidth());
 
                 if((above >= below) && (above >= left) && (above >= right)) {
                     onGroundCollision(o);
@@ -132,10 +132,10 @@ public class Entity extends Visual{
         }
         for (Obj o : Level.objects) {
             if (overlaps(pPosX, pPosY, o)) {
-                double above = o.getPosY()-(getPosY()+getHitbox().height);
-                double below = getPosY()-(o.getPosY()+o.getHitbox().height);
-                double left = o.getPosX()-(getPosX()+getHitbox().width);
-                double right = getPosX()-(o.getPosX()+o.getHitbox().width);
+                double above = o.getPosY()-(getPosY()+getHitbox().getHeight());
+                double below = getPosY()-(o.getPosY()+o.getHitbox().getHeight());
+                double left = o.getPosX()-(getPosX()+getHitbox().getWidth());
+                double right = getPosX()-(o.getPosX()+o.getHitbox().getWidth());
 
                 if((left >= below) && (left >= above) && (left >= right)){
                     hitRight(o);
@@ -150,9 +150,9 @@ public class Entity extends Visual{
     }
 
     public void hitRight(Obj o){
-        if(o.collision == 0) {
+        if(o.getCollision() == 0) {
             currentXSpeed = 0;
-            pPosX = (o.getPosX() - getHitbox().width);
+            pPosX = (o.getPosX() - getHitbox().getWidth());
         }
         if(o instanceof DamageObj){
             death();
@@ -160,9 +160,9 @@ public class Entity extends Visual{
     }
 
     public void hitLeft(Obj o){
-        if(o.collision == 0) {
+        if(o.getCollision() == 0) {
             currentXSpeed = 0;
-            pPosX = (o.getPosX() + o.getHitbox().width);
+            pPosX = (o.getPosX() + o.getHitbox().getWidth());
         }
         if(o instanceof DamageObj){
             death();
@@ -170,13 +170,13 @@ public class Entity extends Visual{
     }
 
     public void onGroundCollision(Obj o) {
-        if(o.collision == 0) {
+        if(o.getCollision() == 0) {
             currentYSpeed = 0;
             jumping = false;
             jumpTime = 0;
             onGround = true;
             currentYSpeed = 0;
-            pPosY = (o.getPosY() - getHitbox().height);
+            pPosY = (o.getPosY() - getHitbox().getHeight());
         }
         if(o instanceof DamageObj){
             death();
@@ -184,10 +184,10 @@ public class Entity extends Visual{
     }
 
     public void hitHeadCollision(Obj o) {
-        if(o.collision == 0) {
+        if(o.getCollision() == 0) {
             currentYSpeed = 0;
             jumping = false;
-            pPosY = (o.getPosY() + o.getHitbox().height);
+            pPosY = (o.getPosY() + o.getHitbox().getHeight());
         }
         if(o instanceof DamageObj){
             death();
