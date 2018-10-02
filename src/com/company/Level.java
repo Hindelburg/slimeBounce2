@@ -3,8 +3,6 @@ package com.company;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Level {
     //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON,
@@ -17,12 +15,12 @@ public class Level {
     public static Obj[] objects = new Obj[18];
     public static Background[] backgrounds = new Background[3];
     public static int deathLevel = 1000;
-    public static Light[] lights = new Light[1];
+    public static Light[] lights = new Light[2];
 
     public static Player player;
 
     public static void addBackgrounds(){
-        Level.backgrounds[0] = (new Background("src\\sprites\\background3.png", 0, 2, 0));
+        Level.backgrounds[0] = (new Background("src\\sprites\\background3.png", 100, 3, -50));
 
         Level.backgrounds[1] = (new Background("src\\sprites\\background.png", 10, 2, 0));
         Level.backgrounds[2] = (new Background("src\\sprites\\background2.png", 5, 2, 400));
@@ -32,11 +30,9 @@ public class Level {
         Level.enemies[0] = (new Enemy("src\\sprites\\slimeStatic.png", 1000, 0, 1, 10, 0.5, 7, 10, 0.6));
 
         //Not enemies in any way at all but since all of this will be gone soon, might as well put it here.
-        //lights.add(new Light(1000, 400, 600, new Color(124, 196, 255)));
-        //lights.add(new Light(1600, 400, 600, new Color(255, 252, 137)));
-        //lights.add(new Light(2200, 400, 600, new Color(155, 126, 169)));
+        lights[0] = (new Light(1000, 400, 200, new Color(161, 0, 0)));
+        lights[1] = (new Light(1000, 400, 1000, new Color(0, 28, 160)));
 
-        lights[0] = (new Light(1000, 400, 200, new Color(196, 70, 95)));
     }
 
     //Must be modified in future.

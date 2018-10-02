@@ -24,8 +24,8 @@ public class Light extends Placeable {
 
     private void lightingUpdate(double posX, double posY){
         for(Visual v : Level.objects){
-            int x = (int)getPosX()-radius;
-            int y = (int)getPosY()-radius;
+            int x = (int)posX-radius;
+            int y = (int)posY-radius;
             if(overlaps(x, y, radius*2, v)){
                 v.lightingUpdate();
             }
@@ -48,7 +48,7 @@ public class Light extends Placeable {
         }
     }
 
-    //I should be squaring but I'm not and later multiplying to increase efficiency.
+    //I should be square rooting but I'm not and later multiplying to increase efficiency.
     private double distance(double posX1, double posY1, double posX2, double posY2){
         return (square(posX2-posX1) + square(posY2-posY1));
     }
@@ -59,5 +59,30 @@ public class Light extends Placeable {
 
     public Color getColor() {
         return color;
+    }
+
+    private void shadowMap(){
+        for(Visual v : Level.objects){
+
+        }
+    }
+
+    private static double angle(double oX, double oY, double lX, double lY){
+        return Math.atan2(oX - lX, oY - lY);
+    }
+
+    private class Shadow{
+        Line one;
+        Line two;
+
+        public Shadow(Line one, Line two){
+            
+        }
+
+        private class Line{
+            double x;
+            double y;
+            double angle;
+        }
     }
 }

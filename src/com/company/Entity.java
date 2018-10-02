@@ -1,11 +1,12 @@
 package com.company;
 
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Entity extends Visual{
     private double maxJumpTime;
@@ -29,13 +30,10 @@ public class Entity extends Visual{
     private double pPosX;
     private double pPosY;
 
-
     private double maxSpeed;
     private double acc;
 
     private double jumpTime = 0;
-
-    private Timer t = new Timer(1, new Listener());
 
     public Entity(String pSprite, double posX, double posY, double scale, double maxJumpTime, double gravity, double jumpSpeed, double maxSpeed, double acc) {
         super(pSprite, posX, posY, scale);
@@ -44,18 +42,13 @@ public class Entity extends Visual{
         this.jumpSpeed = jumpSpeed;
         this.maxSpeed = maxSpeed;
         this.acc = acc;
-
-        t.setDelay(10);
-        t.start();
     }
 
-    private class Listener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            if (active) {
-                ySpeed();
-                xSpeed();
-                safeMove();
-            }
+    public void run(){
+        if (active) {
+            ySpeed();
+            xSpeed();
+            safeMove();
         }
     }
 
@@ -208,8 +201,6 @@ public class Entity extends Visual{
 
         currentXSpeed = 0;
 
-        gravity = 0.5;
-        jumpSpeed = 7;
         currentYSpeed = 0;
 
         onGround = false;
@@ -219,8 +210,6 @@ public class Entity extends Visual{
         right = false;
         left = false;
         tryJumping = false;
-
-        maxSpeed = 10;
 
         jumpTime = 0;
     }

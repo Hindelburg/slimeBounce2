@@ -2,14 +2,15 @@ package com.company;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * We now have a bug where you can get a jump by clipping into the wall kinda I guess. Happens where two Objs overlap or stack or something.
 */
 
 class Panel00 extends JPanel {
-    private Timer t = new Timer(1, new Listener());
-    private Timer framerateCounter = new Timer(1, new Frames());
+    private Timer master = new Timer();
 
     private double height;
     private double width;
@@ -19,25 +20,44 @@ class Panel00 extends JPanel {
 
     private BoundingBox bBox;
 
+    private class Frames extends TimerTask {
+        public void run(){
+            System.out.println(framesPassed/10 + "/50 frames per second.");
+            framesPassed = 0;
+        }
+    }
+
+    private class Test extends Thread{
+        private Timer framerateCounter = new Timer();
+        public void run(){
+            framerateCounter.scheduleAtFixedRate(new Frames(), 10000, 10000);
+        }
+    }
+
     public Panel00(int x, int y){
         super();
         width = x;
         height = y;
 
-        Level.player = new Player("src\\sprites\\slimeStatic.png", 1200, -500, 1, 25, 0.5, 7, 10, 0.6);
+        Level.player = new Player("src\\sprites\\slimeStatic.png", 1200, -500, 1, 12, 1, 14, 15, 1.5);
+        Level.player.solid = false;////tmp!
+
         Level.loadLevel("tutorial");
         Level.addBackgrounds();
         Level.addEnemies();
 
         bBox = new BoundingBox(400, 300);
+        Test t = new Test();
 
-        t.setDelay(10);
-        t.start();
+        master.scheduleAtFixedRate(new Run(), 0, 20);
 
-        framerateCounter.setDelay(10000);//every ten seconds
-        framerateCounter.start();
-
-        Level.music.loop();
+        try {
+            t.run();
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
+        //Level.music.loop(); ////Muting the music so I don't have to listen to it while coding. Terraria music is fine for a placeholder but gets a bit annoying after hearing the start that many times.
 
         addKeyListener(Level.player.getPlayerKey());
 
@@ -51,22 +71,18 @@ class Panel00 extends JPanel {
         }
     }
 
-
     //The background workers.
-    private class Listener implements ActionListener {
-        public void actionPerformed(ActionEvent e){
+    private class Run extends TimerTask {
+        public void run(){
             if(mode.equals("game")){
                 framesPassed++;
                 painter.repaint();
                 fall();//this doesn't belong here...
+                Level.player.run();
+                for(Enemy e : Level.enemies){
+                    e.run();
+                }
             }
-        }
-    }
-
-    private class Frames implements ActionListener {
-        public void actionPerformed(ActionEvent e){
-            System.out.println(framesPassed/10 + "/100 frames per second.");
-            framesPassed = 0;
         }
     }
 
