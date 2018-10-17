@@ -15,6 +15,8 @@ class Panel00 extends JPanel {
     private double height;
     private double width;
     private int framesPassed = 0;
+    private double offsetX;
+    private double offsetY;
 
     public static String mode = "menu";
 
@@ -39,7 +41,7 @@ class Panel00 extends JPanel {
         width = x;
         height = y;
 
-        Level.player = new Player("src\\sprites\\slimeStatic.png", 1200, -500, 1, 12, 1, 14, 15, 1.5);
+        Level.player = new Player("src\\sprites\\slimeStatic.png", 980, 300, 1, 12, 1, 14, 15, 1.5);
         Level.player.solid = false;////tmp!
 
         Level.loadLevel("tutorial");
@@ -62,9 +64,15 @@ class Panel00 extends JPanel {
         addKeyListener(Level.player.getPlayerKey());
 
         addKeyListener(new Key());
+        addMouseListener(new Mouse());
+
         setFocusable(true);
         this.setLayout(new BorderLayout());
         this.add(painter, BorderLayout.CENTER);
+
+        for(Light l : Level.lights){
+            l.lightingUpdate();
+        }
 
         for(Visual o : Level.objects){
             o.lightingUpdate();
@@ -74,11 +82,12 @@ class Panel00 extends JPanel {
     //The background workers.
     private class Run extends TimerTask {
         public void run(){
+            framesPassed++;
             if(mode.equals("game")){
-                framesPassed++;
                 painter.repaint();
                 fall();//this doesn't belong here...
                 Level.player.run();
+
                 for(Enemy e : Level.enemies){
                     e.run();
                 }
@@ -125,13 +134,6 @@ class Panel00 extends JPanel {
     }
 
     private void paintGame(Graphics g){
-        Level.lights[0].setPos(Level.player.getPosX(), Level.player.getPosY());//super temporary, this type of stuff will be handled by collections once those are implemented in the devtools. !TMP
-
-
-
-
-
-
         setOpaque(false);
 
         //Might refactor to a new location, unsure.
@@ -149,26 +151,26 @@ class Panel00 extends JPanel {
             bBox.setPosX(Level.player.getPosX()+(Level.player.getHitbox().getWidth()-bBox.getHitbox().getWidth()));
         }
         //Drawing offset.
-        double tmp1 = bBox.getPosX()+bBox.getHitbox().getWidth()/2-width/2;
-        double tmp2 = bBox.getPosY()+bBox.getHitbox().getHeight()/2-height/2;
+        offsetX = bBox.getPosX()+bBox.getHitbox().getWidth()/2-width/2;
+        offsetY = bBox.getPosY()+bBox.getHitbox().getHeight()/2-height/2;
         //Center of bounding box.
         double test1 = bBox.getPosX()+bBox.getHitbox().getWidth()/2;
         double test2 = bBox.getPosY()+bBox.getHitbox().getHeight()/2;
 
-        g.drawImage(Level.player.getSprite(test1, test2), (int) Math.floor(Level.player.getPosX()-tmp1), (int) Math.floor(Level.player.getPosY()-tmp2), null);
 
         //ENEMIES!
         for(Enemy e : Level.enemies){
             if(onScreen(e, test1, test2)) {
-                g.drawImage(e.getSprite(test1, test2), (int) Math.floor(e.getPosX() - tmp1), (int) Math.floor(e.getPosY() - tmp2), null);
+                g.drawImage(e.getSprite(), (int) Math.floor(e.getPosX() - offsetX), (int) Math.floor(e.getPosY() - offsetY), null);
             }
         }
         //OBJECTS!
         for(Obj o : Level.objects){
             if(onScreen(o, test1, test2)) {
-                g.drawImage(o.getSprite(test1, test2), (int) Math.floor(o.getPosX() - tmp1), (int) Math.floor(o.getPosY() - tmp2), null);
+                g.drawImage(o.getSprite(), (int) Math.floor(o.getPosX() - offsetX), (int) Math.floor(o.getPosY() - offsetY), null);
             }
         }
+        g.drawImage(Level.player.getSprite(), (int) Math.floor(Level.player.getPosX()-offsetX), (int) Math.floor(Level.player.getPosY()-offsetY), null);
     }
 
     private boolean onScreen(Visual o, double xc, double yc){
@@ -206,5 +208,24 @@ class Panel00 extends JPanel {
             }
         }
         public void keyTyped(KeyEvent e) {/* Not used */ }
+    }
+
+    private class Mouse implements MouseListener {
+        public void mouseEntered(MouseEvent e){
+
+        }
+        public void mouseClicked(MouseEvent e){
+        }
+
+        public void mousePressed(MouseEvent e) {
+            Level.lights[0].setPos(e.getX()+offsetX, e.getY()+offsetY);//more work than that.
+        }
+
+        public void mouseReleased(MouseEvent e){
+
+        }
+        public void mouseExited(MouseEvent e){
+
+        }
     }
 }

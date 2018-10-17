@@ -106,6 +106,7 @@ public class Entity extends Visual{
         pPosX = getPosX() + currentXSpeed;
         pPosY = getPosY() + currentYSpeed;
         onGround = false;
+        //Just replaced one bug with another...
         for (Obj o : Level.objects) {
             if (overlaps(pPosX, pPosY, o)) {
                 double above = o.getPosY() - (getPosY() + getHitbox().getHeight());
@@ -119,9 +120,6 @@ public class Entity extends Visual{
                     hitHeadCollision(o);
                 }
             }
-        }
-        if(!onGround){
-            inAir();
         }
         for (Obj o : Level.objects) {
             if (overlaps(pPosX, pPosY, o)) {
@@ -137,6 +135,9 @@ public class Entity extends Visual{
                     hitLeft(o);
                 }
             }
+        }
+        if(!onGround){
+            inAir();
         }
         setPosX(pPosX);
         setPosY(pPosY);
@@ -168,7 +169,6 @@ public class Entity extends Visual{
             jumping = false;
             jumpTime = 0;
             onGround = true;
-            currentYSpeed = 0;
             pPosY = (o.getPosY() - getHitbox().getHeight());
         }
         if(o instanceof DamageObj){
