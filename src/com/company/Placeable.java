@@ -1,6 +1,9 @@
 package com.company;
 
+import java.awt.*;
+
 public class Placeable {
+    private Point grabPos;
     private double defaultPosX;
     private double defaultPosY;
     private double posX, posY;

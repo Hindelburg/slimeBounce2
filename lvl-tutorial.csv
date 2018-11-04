@@ -5,9 +5,9 @@ src\sprites\staticObject.png,4000,700,2,0
 src\sprites\staticObject.png,500,700,3,0
 src\sprites\staticObject.png,540,450,3,0
 src\sprites\staticObject.png,800,350,3,0
+src\sprites\enemy.png,1100,400,4,1
 src\sprites\enemy.png,1000,400,3,1
-src\sprites\staticObject.png,-200,600,5,0
-src\sprites\staticObject.png,1500,400,6,0
+src\sprites\staticObject.png,5000,400,1,0
 src\sprites\staticObject.png,1250,500,3,0
 src\sprites\staticObject.png,1250,100,3,0
 src\sprites\staticObject.png,1500,600,3,0

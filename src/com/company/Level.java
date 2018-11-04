@@ -1,8 +1,14 @@
 package com.company;
 
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+
+import groovy.json.JsonParser;
+import org.json.*;
 
 public class Level {
     //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON,
@@ -10,45 +16,100 @@ public class Level {
     //UPDATE: DEVTOOLS ARE NOW GOING TO BE BUILT INTO THE BASE GAME, BUT THIS
     //WILL STILL BE CHANGED COMPLETELY.
 
-    public static Sounds music = new Sounds("src\\sprites\\music.wav");
     //I'm gonna have to make this better once devtools are done...
-    public static Enemy[] enemies = new Enemy[0];
-    public static Obj[] objects = new Obj[18];
-    public static Background[] backgrounds = new Background[3];
-    public static int deathLevel = 1000;
-    public static Light[] lights = new Light[2];
+    //public static Enemy[] enemies = new Enemy[0];
+    //public static Obj[] objects = new Obj[18];
+    //public static Background[] backgrounds = new Background[3];
+    //public static Light[] lights = new Light[2];
+    public static String name;
+    public static int deathLevel;
+    public static Sounds music;
+    public static Color ambientLight = new Color(44, 0, 0);
+
+    public static ArrayList<Obj> objects = new ArrayList();
+    public static ArrayList<Enemy> enemies = new ArrayList();
+    public static ArrayList<Light> lights = new ArrayList();
+    public static ArrayList<Background> backgrounds = new ArrayList();
 
     public static Player player;
 
-    public static void addBackgrounds(){
-        Level.backgrounds[0] = (new Background("src\\sprites\\background3.png", 100, 3, -50));
-        Level.backgrounds[1] = (new Background("src\\sprites\\background.png", 10, 2, 0));
-        Level.backgrounds[2] = (new Background("src\\sprites\\background2.png", 5, 2, 400));
-    }
-
-    public static void addEnemies(){
-        //Level.enemies[0] = (new Enemy("src\\sprites\\slimeStatic.png", 1000, 0, 1, 10, 0.5, 7, 10, 0.6));
-        objects[0] = new Obj("src\\sprites\\enemy.png",450, 50, 5, 2);
-        objects[0].solid = false;
-
-        //Not enemies in any way at all but since all of this will be gone soon, might as well put it here.
-        lights[0] = (new Light(1000000, 400, 60, new Color(3, 187, 0)));
-        lights[1] = (new Light(980, 300, 1000, new Color(185, 0, 16)));
-    }
-
-    //Must be modified in future.
-    public static void loadLevel(String name){
-        System.out.println("Loading.");
-        int stupid = 0;
+    public static void loadLevel(String name) throws JSONException{
+        String json = null;
         try{
-            BufferedReader r = new BufferedReader(new FileReader("lvl-"+name+".csv"));
-            String tmp = r.readLine();
-            while(!(tmp == null)){
-                String[] obj = tmp.split(",");
-                objects[stupid] = (new Obj(obj[0], Integer.parseInt(obj[1]),Integer.parseInt(obj[2]),Integer.parseInt(obj[3]),0));
-                tmp = r.readLine();
-                stupid++;
+            json = new String(Files.readAllBytes(Paths.get("src\\sprites\\"+ name+".json")), StandardCharsets.UTF_8);
+        }
+        catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
+        JSONObject levelObject = new JSONObject(json);
+        name = levelObject.getString("name");
+        deathLevel = levelObject.getInt("deathLevel");
+        music = new Sounds(levelObject.getString("music"));
+        JSONObject alo = levelObject.getJSONObject("ambientLight");
+        ambientLight = new Color(alo.getInt("red"),alo.getInt("green"),alo.getInt("blue"));
+        //Skipping spawn for now.
+        JSONArray objectArray = levelObject.getJSONArray("objects");
+        for(int i = 0; i < objectArray.length(); i++) {
+            JSONObject object = objectArray.getJSONObject(i);
+
+            objects.add(new Obj(object.getString("sprite"), object.getInt("x"), object.getInt("y"), object.getInt("scale"), object.getInt("collision")));
+        }
+        JSONArray lightsArray = levelObject.getJSONArray("lights");
+        for(int i = 0; i < lightsArray.length(); i++) {
+            JSONObject object = lightsArray.getJSONObject(i);
+
+            lights.add(new Light(object.getInt("x"), object.getInt("y"), object.getInt("radius"), new Color(object.getInt("red"),object.getInt("green"),object.getInt("blue"))));
+        }
+    }
+
+
+    public void saveLevel(String levelName){
+        JSONObject obj = new JSONObject();
+        try {
+            obj.put("name", name);
+            obj.put("deathLevel", deathLevel);
+            obj.put("music", music);
+            JSONObject ambientJSON = new JSONObject();
+            ambientJSON.put("red", ambientLight.getRed());
+            ambientJSON.put("green", ambientLight.getGreen());
+            ambientJSON.put("blue", ambientLight.getBlue());
+            obj.put("ambientLight", ambientJSON);
+            //Skipping spawn for now.
+            JSONArray objectArray = new JSONArray();
+            for (Obj o : objects){
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("sprite", o.getSource());
+                jsonObj.put("x", o.getPosX());
+                jsonObj.put("y", o.getPosY());
+                jsonObj.put("scale", o.getScale());
+                jsonObj.put("collision", o.getCollision());
+
+                objectArray.put(jsonObj);
             }
+
+            obj.put("objects", objectArray);
+
+            JSONArray lightArray = new JSONArray();
+            for (Light l : lights){
+                JSONObject jsonObj = new JSONObject();
+                jsonObj.put("x", l.getPosX());
+                jsonObj.put("y", l.getPosY());
+                jsonObj.put("radius", l.getRadius());
+                jsonObj.put("red", l.getColor().getRed());
+                jsonObj.put("green", l.getColor().getGreen());
+                jsonObj.put("blue", l.getColor().getBlue());
+
+                lightArray.put(jsonObj);
+            }
+
+            obj.put("lights", lightArray);
+
+            FileWriter writer = new FileWriter(levelName + ".json");
+            writer.write(obj.toString());
+            writer.close();
+
+            System.out.println(obj.toString());
         }
         catch (Exception e){
             System.out.println(e.getMessage());

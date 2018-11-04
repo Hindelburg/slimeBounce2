@@ -36,17 +36,22 @@ class Panel00 extends JPanel {
         }
     }
 
+
+
     public Panel00(int x, int y){
         super();
         width = x;
         height = y;
 
-        Level.player = new Player("src\\sprites\\slimeStatic.png", 980, 300, 1, 12, 1, 14, 15, 1.5);
+        Level.player = new Player("src\\sprites\\slimeStatic.png", 990, 300, 1, 12, 1, 14, 15, 1.5);
         Level.player.solid = false;////tmp!
 
-        Level.loadLevel("tutorial");
-        Level.addBackgrounds();
-        Level.addEnemies();
+        try{
+            Level.loadLevel("level");
+        }
+        catch(Exception e){
+            System.out.println(e.getMessage());
+        }
 
         bBox = new BoundingBox(400, 300);
         Test t = new Test();
@@ -210,6 +215,10 @@ class Panel00 extends JPanel {
         public void keyTyped(KeyEvent e) {/* Not used */ }
     }
 
+
+    /**
+     * Currently a work in progress.
+     */
     private class Mouse implements MouseListener {
         public void mouseEntered(MouseEvent e){
 
@@ -218,7 +227,8 @@ class Panel00 extends JPanel {
         }
 
         public void mousePressed(MouseEvent e) {
-            Level.lights[0].setPos(e.getX()+offsetX, e.getY()+offsetY);//more work than that.
+            //Level.lights[0].setPos(e.getX()+offsetX, e.getY()+offsetY);//more work than that.
+            //Level.lights.get(0).setPos(e.getX()+offsetX, e.getY()+offsetY);//more work than that.
         }
 
         public void mouseReleased(MouseEvent e){

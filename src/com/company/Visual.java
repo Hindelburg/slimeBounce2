@@ -12,13 +12,15 @@ public abstract class Visual extends Placeable{
     private double scale;
     private int[] pixelsOriginal;
     private int[] pixelsModified;
-    private int[] pixelsFinal;
+    private String source;
+
     public boolean solid; //temporary for testing.
 
     public Visual(String pSprite, double pPosX, double pPosY, double pScale){
         super(pPosX, pPosY);
         loadSprite(pSprite);
         scale = pScale;
+        source = pSprite;
         Size hitbox = new Size((int)Math.floor(tmpSprites.getWidth()*scale), (int)Math.floor((tmpSprites.getHeight()*scale)));
         setHitbox(hitbox);
 
@@ -32,7 +34,6 @@ public abstract class Visual extends Placeable{
 
         pixelsOriginal = ((DataBufferInt)tmpSprites.getRaster().getDataBuffer()).getData();
         pixelsModified = ((DataBufferInt)tmpSprites2.getRaster().getDataBuffer()).getData();
-        pixelsFinal = ((DataBufferInt)scaledBuffered.getRaster().getDataBuffer()).getData();
 
         solid=true;
     }
@@ -126,6 +127,10 @@ public abstract class Visual extends Placeable{
                 blueLight = (int) (blueLight + Math.max(0, ((light.getColor().getBlue() * i) * otherMod)));
             }
         }
+        //Not sure this is how I want to do this. I think blocks should still blackout after time, but I'm unsure how I'd accomplish that.
+        redLight = (redLight + Math.max(0, ((Level.ambientLight.getRed()))));
+        greenLight = (greenLight + Math.max(0, ((Level.ambientLight.getGreen()))));
+        blueLight = (blueLight + Math.max(0, ((Level.ambientLight.getBlue()))));
 
         r = r - (int) (r * ((255 - (double) redLight) / 255));
         r = Math.max(r, 0);
@@ -145,4 +150,11 @@ public abstract class Visual extends Placeable{
         pixelsModified[x+(getHitbox().getWidth()*y)] = colorOriginal;
     }
 
+    public String getSource() {
+        return source;
+    }
+
+    public double getScale() {
+        return scale;
+    }
 }

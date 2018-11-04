@@ -1,39 +1,38 @@
 package com.company;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Entity extends Visual{
-    private double maxJumpTime;
-
     private static final int PLACES = 2;
 
+    //Speeds
     private double currentXSpeed = 0;
     private double currentYSpeed = 0;
 
-    private double gravity;
-    private double jumpSpeed;
-
-    private boolean onGround = false;
     public boolean active = false;
 
+    //Vertical movement related variables (except speed)
+    private final double maxJumpTime;
+    private double gravity;
+    private double jumpSpeed;
+    private double jumpTime = 0;
+
+    private boolean onGround = false;
     protected boolean jumping = false;
+
+    //Controls
     protected boolean right = false;
     protected boolean left = false;
     protected boolean tryJumping = false;
 
-    private double pPosX;
-    private double pPosY;
-
+    //Speed related things.
     private double maxSpeed;
     private double acc;
 
-    private double jumpTime = 0;
 
     public Entity(String pSprite, double posX, double posY, double scale, double maxJumpTime, double gravity, double jumpSpeed, double maxSpeed, double acc) {
         super(pSprite, posX, posY, scale);
@@ -42,6 +41,37 @@ public class Entity extends Visual{
         this.jumpSpeed = jumpSpeed;
         this.maxSpeed = maxSpeed;
         this.acc = acc;
+    }
+
+    private class State{
+        public double posX;
+        public double posY;
+        public double currentXSpeed;
+        public double currentYSpeed;
+        public int count = 0;
+        public double jumpTime;///
+        public boolean jumping;///
+        public boolean onGround;///
+
+        public State(double posX, double posY, Entity entity){
+            this.posX = posX;
+            this.posY = posY;
+            currentXSpeed = entity.currentXSpeed;
+            currentYSpeed = entity.currentYSpeed;
+            jumpTime = entity.jumpTime;
+            jumping = entity.jumping;
+            onGround = entity.onGround;
+        }
+    }
+
+    private void adoptState(State state){
+        setPosX(state.posX);
+        setPosY(state.posY);
+        currentXSpeed = state.currentXSpeed;
+        currentYSpeed = state.currentYSpeed;
+        jumpTime = state.jumpTime;
+        jumping = state.jumping;
+        onGround = state.onGround;
     }
 
     public void run(){
@@ -59,7 +89,6 @@ public class Entity extends Visual{
         bd = bd.setScale(PLACES, RoundingMode.HALF_UP);
         return bd.doubleValue();
     }
-
 
     private void xSpeed() {
         if (right && left || (!right && !left)) {
@@ -103,84 +132,95 @@ public class Entity extends Visual{
     }
 
     private void safeMove(){
-        pPosX = getPosX() + currentXSpeed;
-        pPosY = getPosY() + currentYSpeed;
-        onGround = false;
-        //Just replaced one bug with another...
-        for (Obj o : Level.objects) {
-            if (overlaps(pPosX, pPosY, o)) {
-                double above = o.getPosY() - (getPosY() + getHitbox().getHeight());
-                double below = getPosY() - (o.getPosY() + o.getHitbox().getHeight());
-                double left = o.getPosX() - (getPosX() + getHitbox().getWidth());
-                double right = getPosX() - (o.getPosX() + o.getHitbox().getWidth());
+        double pPosX = getPosX() + currentXSpeed;
+        double pPosY = getPosY() + currentYSpeed;
+        inAir();
 
-                if((above >= below) && (above >= left) && (above >= right)) {
-                    onGroundCollision(o);
-                } else if ((below >= left) && (below >= right)) {
-                    hitHeadCollision(o);
-                }
+        State state = safeMovePrimary(pPosX, pPosY);
+        if(state.count > 1) {
+            state = safeMoveSecondary(pPosX, pPosY);
+        }
+
+        adoptState(state);
+    }
+
+    private void overlaps(Obj o, State state){
+        if (overlaps(state.posX, state.posY, o)) {
+            double above = o.getPosY() - (getPosY() + getHitbox().getHeight());
+            double below = getPosY() - (o.getPosY() + o.getHitbox().getHeight());
+            double left = o.getPosX() - (getPosX() + getHitbox().getWidth());
+            double right = getPosX() - (o.getPosX() + o.getHitbox().getWidth());
+
+            if ((above >= below) && (above >= left) && (above >= right)) {
+                onGroundCollision(o, state);
+            } else if ((below >= left) && (below >= right) && (below >= above)) {
+                hitHeadCollision(o, state);
+            } else if ((left >= below) && (left >= above) && (left >= right)) {
+                hitRight(o, state);
+            } else if ((right >= below) && (right >= above) && (right >= left)) {
+                hitLeft(o, state);
             }
+            state.count++;
         }
+    }
+
+
+    private State safeMovePrimary(double pPosX, double pPosY){
+        State state = new State(pPosX, pPosY, this);
         for (Obj o : Level.objects) {
-            if (overlaps(pPosX, pPosY, o)) {
-                double above = o.getPosY()-(getPosY()+getHitbox().getHeight());
-                double below = getPosY()-(o.getPosY()+o.getHitbox().getHeight());
-                double left = o.getPosX()-(getPosX()+getHitbox().getWidth());
-                double right = getPosX()-(o.getPosX()+o.getHitbox().getWidth());
-
-                if((left >= below) && (left >= above) && (left >= right)){
-                    hitRight(o);
-                }
-                else if((right >= below) && (right >= above)){
-                    hitLeft(o);
-                }
-            }
+            overlaps(o, state);
         }
-        if(!onGround){
-            inAir();
-        }
-        setPosX(pPosX);
-        setPosY(pPosY);
+        return state;
     }
 
-    public void hitRight(Obj o){
+    private State safeMoveSecondary(double pPosX, double pPosY){
+        State state = new State(pPosX, pPosY,this);
+        //for (int i = Level.objects.length-1; i != 0; i--) {
+        for (int i = Level.objects.size()-1; i != 0; i--) {
+            //overlaps(Level.objects[i], state);
+            overlaps(Level.objects.get(i), state);
+        }
+        return state;
+    }
+
+    public void hitRight(Obj o, State state){
         if(o.getCollision() == 0) {
-            currentXSpeed = 0;
-            pPosX = (o.getPosX() - getHitbox().getWidth());
+            state.currentXSpeed = 0;
+            state.posX = ((int)(o.getPosX() - getHitbox().getWidth()));
         }
         if(o instanceof DamageObj){
             death();
         }
     }
 
-    public void hitLeft(Obj o){
+    public void hitLeft(Obj o, State state){
         if(o.getCollision() == 0) {
-            currentXSpeed = 0;
-            pPosX = (o.getPosX() + o.getHitbox().getWidth());
+            state.currentXSpeed = 0;
+            state.posX = ((int)(o.getPosX() + o.getHitbox().getWidth()));
         }
         if(o instanceof DamageObj){
             death();
         }
     }
 
-    public void onGroundCollision(Obj o) {
+    public void onGroundCollision(Obj o, State state) {
         if(o.getCollision() == 0) {
-            currentYSpeed = 0;
-            jumping = false;
-            jumpTime = 0;
-            onGround = true;
-            pPosY = (o.getPosY() - getHitbox().getHeight());
+            state.currentYSpeed = 0;
+            state.jumping = false;
+            state.jumpTime = 0;
+            state.onGround = true;
+            state.posY = ((int)(o.getPosY() - getHitbox().getHeight()));
         }
         if(o instanceof DamageObj){
             death();
         }
     }
 
-    public void hitHeadCollision(Obj o) {
+    public void hitHeadCollision(Obj o, State state) {
         if(o.getCollision() == 0) {
-            currentYSpeed = 0;
-            jumping = false;
-            pPosY = (o.getPosY() + o.getHitbox().getHeight());
+            state.currentYSpeed = 0;
+            state.jumping = false;
+            state.posY = ((int)(o.getPosY() + o.getHitbox().getHeight()));
         }
         if(o instanceof DamageObj){
             death();
@@ -196,9 +236,6 @@ public class Entity extends Visual{
     }
 
     public void reset() {
-        setPosY(getDefaultPosY());
-        setPosX(getDefaultPosX());
-
         currentXSpeed = 0;
 
         currentYSpeed = 0;
@@ -212,5 +249,8 @@ public class Entity extends Visual{
         tryJumping = false;
 
         jumpTime = 0;
+
+        setPosY(getDefaultPosY());
+        setPosX(getDefaultPosX());
     }
 }

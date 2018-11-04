@@ -1,0 +1,12 @@
+{
+	"name":"tutorial",
+	"deathLevel":1000,
+	"music":"src\\sprites\\music.wav",
+	"ambientLight":{"red":44,"green":0,"blue":0},
+	"objects":[
+		{"sprite":"src\\sprites\\staticObject.png","x":950,"y":310,"scale":16,"collision":0}
+		],
+	"lights":[
+		{"x":980,"y":300,"radius":1000,"red":185,"green":0,"blue":16}
+	]
+}
