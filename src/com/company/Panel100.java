@@ -5,10 +5,6 @@ import java.awt.event.*;
 import java.util.Timer;
 import java.util.TimerTask;
 
-/**
- * We now have a bug where you can get a jump by clipping into the wall kinda I guess. Happens where two Objs overlap or stack or something.
-*/
-
 class Panel00 extends JPanel {
     private Timer master = new Timer();
 
@@ -35,8 +31,6 @@ class Panel00 extends JPanel {
             framerateCounter.scheduleAtFixedRate(new Frames(), 10000, 10000);
         }
     }
-
-
 
     public Panel00(int x, int y){
         super();
@@ -162,13 +156,13 @@ class Panel00 extends JPanel {
         double test1 = bBox.getPosX()+bBox.getHitbox().getWidth()/2;
         double test2 = bBox.getPosY()+bBox.getHitbox().getHeight()/2;
 
-
         //ENEMIES!
         for(Enemy e : Level.enemies){
             if(onScreen(e, test1, test2)) {
                 g.drawImage(e.getSprite(), (int) Math.floor(e.getPosX() - offsetX), (int) Math.floor(e.getPosY() - offsetY), null);
             }
         }
+
         //OBJECTS!
         for(Obj o : Level.objects){
             if(onScreen(o, test1, test2)) {
@@ -182,14 +176,11 @@ class Panel00 extends JPanel {
         return !(((yc-(height/2) > o.getPosY()+o.getHitbox().getHeight())) || ((yc+(height/2)) < o.getPosY()) || ((xc-(width/2) > o.getPosX()+o.getHitbox().getWidth())) || ((xc+(width/2)) < o.getPosX()));
     }
 
-
-
     private void fall(){
         if(Level.player.getPosY() > Level.deathLevel){
             Level.gameover();
         }
     }
-
 
     private class Key implements KeyListener {
         public void keyPressed(KeyEvent e){
@@ -215,14 +206,13 @@ class Panel00 extends JPanel {
         public void keyTyped(KeyEvent e) {/* Not used */ }
     }
 
-
     /**
      * Currently a work in progress.
      */
     private class Mouse implements MouseListener {
         public void mouseEntered(MouseEvent e){
-
         }
+
         public void mouseClicked(MouseEvent e){
         }
 
@@ -232,10 +222,9 @@ class Panel00 extends JPanel {
         }
 
         public void mouseReleased(MouseEvent e){
-
         }
-        public void mouseExited(MouseEvent e){
 
+        public void mouseExited(MouseEvent e){
         }
     }
 }

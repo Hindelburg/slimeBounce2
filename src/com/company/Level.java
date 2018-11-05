@@ -6,17 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
-import groovy.json.JsonParser;
 import org.json.*;
 
 public class Level {
-    //WILL CHANGE TO JSON OBJECT WITH MORE STUFF SOON,
-    //ONCE THE DEVTOOLS ARE UP TO DATE WHICH SHOULD HAPPEN ONCE LIGHTING IS DONE.
-    //UPDATE: DEVTOOLS ARE NOW GOING TO BE BUILT INTO THE BASE GAME, BUT THIS
-    //WILL STILL BE CHANGED COMPLETELY.
-
-    //I'm gonna have to make this better once devtools are done...
     //public static Enemy[] enemies = new Enemy[0];
     //public static Obj[] objects = new Obj[18];
     //public static Background[] backgrounds = new Background[3];
