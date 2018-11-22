@@ -3,7 +3,6 @@ package com.company;
 import java.awt.*;
 
 public class Placeable {
-    private Point grabPos;
     private double defaultPosX;
     private double defaultPosY;
     private double posX, posY;
@@ -43,6 +42,7 @@ public class Placeable {
     public Size getHitbox(){
         return hitbox;
     }
+
     public void setHitbox(Size hitbox){
         this.hitbox = hitbox;
     }

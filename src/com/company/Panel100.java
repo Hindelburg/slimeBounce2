@@ -13,6 +13,9 @@ class Panel00 extends JPanel {
     private int framesPassed = 0;
     private double offsetX;
     private double offsetY;
+    private Obj grabbed;
+    private int grabbedX;
+    private int grabbedY;
 
     public static String mode = "menu";
 
@@ -64,6 +67,7 @@ class Panel00 extends JPanel {
 
         addKeyListener(new Key());
         addMouseListener(new Mouse());
+        addMouseMotionListener(new MouseMovement());
 
         setFocusable(true);
         this.setLayout(new BorderLayout());
@@ -134,14 +138,16 @@ class Panel00 extends JPanel {
 
     private void paintGame(Graphics g){
         setOpaque(false);
-
-        //Might refactor to a new location, unsure.
+        //Will refactor this code to be more readable and in a more logical position in code, probably in the bounding box object itself.
         //Moves the bounding box when the player gets to the edge of it.
         if((bBox.getPosY() > Level.player.getPosY())){
             bBox.setPosY(Level.player.getPosY());
         }
-        if(((bBox.getPosY() + bBox.getHitbox().getHeight()) < Level.player.getPosY()+Level.player.getHitbox().getHeight())){
-            bBox.setPosY(Level.player.getPosY()+(Level.player.getHitbox().getHeight()-bBox.getHitbox().getHeight()));
+        double boxBottom = bBox.getPosY() + bBox.getHitbox().getHeight();
+        double playerBottom = Level.player.getPosY()+Level.player.getHitbox().getHeight();
+
+        if(boxBottom < playerBottom){
+            bBox.setPosY(playerBottom-bBox.getHitbox().getHeight());
         }
         if((bBox.getPosX() > Level.player.getPosX())){
             bBox.setPosX(Level.player.getPosX());
@@ -169,6 +175,15 @@ class Panel00 extends JPanel {
                 g.drawImage(o.getSprite(), (int) Math.floor(o.getPosX() - offsetX), (int) Math.floor(o.getPosY() - offsetY), null);
             }
         }
+
+
+        if(grabbed != null){
+            g.drawImage(grabbed.getSprite(), (int) Math.floor(grabbedX-grabbed.getGrabPos().getX()), (int) Math.floor(grabbedY-grabbed.getGrabPos().getY()), null);
+        }
+        else{
+
+        }
+
         g.drawImage(Level.player.getSprite(), (int) Math.floor(Level.player.getPosX()-offsetX), (int) Math.floor(Level.player.getPosY()-offsetY), null);
     }
 
@@ -206,6 +221,23 @@ class Panel00 extends JPanel {
         public void keyTyped(KeyEvent e) {/* Not used */ }
     }
 
+    private void grabObj(int x, int y){
+        for (Obj o : Level.objects) {
+            if(o.tryGrabPos(x+(int)offsetX,y+(int)offsetY)){
+                grabbed = o;
+                break;
+            }
+        }
+    }
+
+    private void dropObj(int x, int y){
+        if(grabbed != null) {
+            Point grabPoint = grabbed.getGrabPos();
+            grabbed.setPos(x + offsetX - grabPoint.getX(), (y + offsetY - grabPoint.getY()));
+        }
+        grabbed = null;
+    }
+
     /**
      * Currently a work in progress.
      */
@@ -217,14 +249,33 @@ class Panel00 extends JPanel {
         }
 
         public void mousePressed(MouseEvent e) {
+            grabObj(e.getX(), e.getY());
+
             //Level.lights[0].setPos(e.getX()+offsetX, e.getY()+offsetY);//more work than that.
             //Level.lights.get(0).setPos(e.getX()+offsetX, e.getY()+offsetY);//more work than that.
         }
 
-        public void mouseReleased(MouseEvent e){
+        public void mouseReleased(MouseEvent e) {
+            dropObj(e.getX(), e.getY());
+            for (Light l : Level.lights) {
+                l.lightingUpdate();//Find way to update shadows for just one object.
+            }
         }
 
         public void mouseExited(MouseEvent e){
+        }
+    }
+
+    private class MouseMovement implements MouseMotionListener {
+        @Override
+        public void mouseDragged(MouseEvent e) {
+            grabbedX = e.getX();
+            grabbedY = e.getY();
+        }
+
+        @Override
+        public void mouseMoved(MouseEvent e) {
+
         }
     }
 }
